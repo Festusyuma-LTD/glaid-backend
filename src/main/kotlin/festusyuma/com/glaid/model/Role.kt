@@ -1,4 +1,15 @@
 package festusyuma.com.glaid.model
 
-class Role {
-}
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.Id
+
+@Entity
+data class Role (
+
+        @Id
+        @GeneratedValue
+        val id: Long? = null,
+
+        val role: String
+)
