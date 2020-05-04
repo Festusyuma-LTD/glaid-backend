@@ -1,9 +1,6 @@
 package festusyuma.com.glaid.model
 
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.OneToOne
+import javax.persistence.*
 
 @Entity
 data class Customer (
@@ -13,6 +10,9 @@ data class Customer (
         val id: Long,
 
         @OneToOne
-        var user: User
+        val user: User,
+
+        @OneToMany
+        var address: List<Address> = listOf()
 ) {
 }
