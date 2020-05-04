@@ -1,9 +1,6 @@
 package festusyuma.com.glaid.model
 
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
+import javax.persistence.*
 import javax.validation.constraints.Email
 
 @Entity
@@ -19,7 +16,10 @@ data class User (
         var firstName: String,
         var lastName: String,
         var otherNames: String,
-        var password: String
+        var password: String,
+
+        @ManyToOne
+        var role: Role? = null
 ) {
         constructor(): this(
                 email = "",
