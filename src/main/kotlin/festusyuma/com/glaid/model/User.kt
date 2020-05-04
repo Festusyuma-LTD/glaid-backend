@@ -13,19 +13,11 @@ data class User (
         @Column(unique = true)
         var email: String,
 
-        var firstName: String,
-        var lastName: String,
-        var otherNames: String,
-        var password: String,
+        var firstName: String = "",
+        var lastName: String = "",
+        var otherNames: String = "",
+        var password: String = "",
 
         @ManyToOne
         var role: Role? = null
-) {
-        constructor(): this(
-                email = "",
-                firstName = "",
-                lastName = "",
-                otherNames = "",
-                password = ""
-        )
-}
+)
