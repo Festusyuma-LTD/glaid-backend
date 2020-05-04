@@ -12,6 +12,9 @@ data class Customer (
         @OneToOne
         val user: User,
 
+        @OneToOne
+        val wallet: Wallet,
+
         @OneToMany
         var address: List<Address> = listOf()
 ) {

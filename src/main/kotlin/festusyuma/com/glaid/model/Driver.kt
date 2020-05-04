@@ -13,6 +13,9 @@ data class Driver (
         val id: Long,
 
         @OneToOne
-        var user: User
+        val user: User,
+
+        @OneToOne
+        val wallet: Wallet
 ) {
 }
