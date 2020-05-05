@@ -16,6 +16,9 @@ data class Customer (
         val wallet: Wallet,
 
         @OneToMany
-        var address: List<Address> = listOf()
+        var address: List<Address> = listOf(),
+
+        @OneToMany
+        var paymentCard: List<PaymentCard> = listOf()
 ) {
 }
