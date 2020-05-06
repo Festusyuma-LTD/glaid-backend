@@ -1,9 +1,6 @@
 package festusyuma.com.glaid.model
 
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.OneToOne
+import javax.persistence.*
 
 @Entity
 data class Driver (
@@ -16,6 +13,9 @@ data class Driver (
         val user: User,
 
         @OneToOne
-        val wallet: Wallet
+        val wallet: Wallet,
+
+        @OneToMany
+        val bookings: List<Booking> = listOf()
 ) {
 }

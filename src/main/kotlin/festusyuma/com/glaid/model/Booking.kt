@@ -11,6 +11,9 @@ data class Booking (
         val id: Long? = null,
 
         @ManyToOne
+        var driver: Driver? = null,
+
+        @ManyToOne
         val customer: Customer,
 
         @OneToOne
@@ -26,5 +29,8 @@ data class Booking (
         var amount: Double,
         var deliveryPrice: Double,
         var tax: Double,
-        var scheduledDate: Date
+        var scheduledDate: Date,
+
+        @ManyToOne
+        var status: DeliveryStatus
 )

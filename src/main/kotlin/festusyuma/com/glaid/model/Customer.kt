@@ -19,6 +19,9 @@ data class Customer (
         var address: List<Address> = listOf(),
 
         @OneToMany
-        var paymentCard: List<PaymentCard> = listOf()
+        var paymentCard: List<PaymentCard> = listOf(),
+
+        @OneToMany
+        var bookings: List<Booking> = listOf()
 ) {
 }
