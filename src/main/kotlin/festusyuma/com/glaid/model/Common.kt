@@ -8,15 +8,15 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @Entity
-data class Common (
+open class Common (
 
      @Id
      @GeneratedValue
-     val id: Long? = null,
+     var id: Long? = null,
 
      @CreatedDate
-     val created: Date,
+     val created: Date = Date(),
 
      @UpdateTimestamp
-     var updated: Date
+     var updated: Date = Date()
 )

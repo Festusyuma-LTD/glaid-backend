@@ -5,10 +5,6 @@ import javax.persistence.*
 @Entity
 data class Driver (
 
-        @Id
-        @GeneratedValue
-        val id: Long,
-
         @OneToOne
         val user: User,
 
@@ -17,5 +13,4 @@ data class Driver (
 
         @OneToMany
         val bookings: List<Booking> = listOf()
-) {
-}
+): Common()

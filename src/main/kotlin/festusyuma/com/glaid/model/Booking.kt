@@ -6,10 +6,6 @@ import javax.persistence.*
 @Entity
 data class Booking (
 
-        @Id
-        @GeneratedValue
-        val id: Long? = null,
-
         @ManyToOne
         var driver: Driver? = null,
 
@@ -33,4 +29,4 @@ data class Booking (
 
         @ManyToOne
         var status: DeliveryStatus
-)
+): Common()

@@ -6,10 +6,5 @@ import javax.persistence.Id
 
 @Entity
 data class DeliveryStatus (
-
-        @Id
-        @GeneratedValue
-        val id: Long? = null,
-
-        var string: String = ""
-)
+        var status: String = ""
+): Common()

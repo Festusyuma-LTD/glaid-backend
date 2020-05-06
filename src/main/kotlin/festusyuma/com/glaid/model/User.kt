@@ -5,9 +5,6 @@ import javax.validation.constraints.Email
 
 @Entity
 data class User (
-        @Id
-        @GeneratedValue
-        val id: Long? = null,
 
         @Email
         @Column(unique = true)
@@ -20,4 +17,4 @@ data class User (
 
         @ManyToOne
         var role: Role? = null
-)
+): Common()

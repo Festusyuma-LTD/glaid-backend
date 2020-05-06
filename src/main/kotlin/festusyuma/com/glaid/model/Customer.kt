@@ -5,10 +5,6 @@ import javax.persistence.*
 @Entity
 data class Customer (
 
-        @Id
-        @GeneratedValue
-        val id: Long,
-
         @OneToOne
         val user: User,
 
@@ -23,5 +19,4 @@ data class Customer (
 
         @OneToMany
         var bookings: List<Booking> = listOf()
-) {
-}
+): Common()
