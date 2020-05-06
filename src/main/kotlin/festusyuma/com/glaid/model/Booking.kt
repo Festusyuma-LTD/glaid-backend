@@ -25,7 +25,7 @@ data class Booking (
         var amount: Double,
         var deliveryPrice: Double,
         var tax: Double,
-        var scheduledDate: LocalDateTime,
+        var scheduledDate: LocalDateTime = LocalDateTime.now(),
 
         @ManyToOne
         var status: DeliveryStatus
