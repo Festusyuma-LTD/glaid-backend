@@ -2,7 +2,7 @@ package festusyuma.com.glaid.model
 
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.CreatedDate
-import java.util.*
+import java.time.LocalDateTime
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
@@ -15,8 +15,8 @@ open class Common (
      var id: Long? = null,
 
      @CreatedDate
-     val created: Date = Date(),
+     val created: LocalDateTime = LocalDateTime.now(),
 
      @UpdateTimestamp
-     var updated: Date = Date()
+     var updated: LocalDateTime = LocalDateTime.now()
 )

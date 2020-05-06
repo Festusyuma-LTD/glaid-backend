@@ -1,6 +1,6 @@
 package festusyuma.com.glaid.model
 
-import java.util.*
+import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
@@ -25,7 +25,7 @@ data class Booking (
         var amount: Double,
         var deliveryPrice: Double,
         var tax: Double,
-        var scheduledDate: Date,
+        var scheduledDate: LocalDateTime,
 
         @ManyToOne
         var status: DeliveryStatus
