@@ -23,7 +23,7 @@ data class Booking (
         val gasType: GasType,
 
         @OneToOne
-        val deliveryAddress: Address,
+        val shippingAddress: Address,
 
         val quantity: Int,
         var amount: Double,
