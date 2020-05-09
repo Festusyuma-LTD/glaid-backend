@@ -10,6 +10,9 @@ data class Order (
         var driver: Driver? = null,
 
         @ManyToOne
+        var truck: GasTruck? = null,
+
+        @ManyToOne
         val customer: Customer,
 
         @OneToOne
