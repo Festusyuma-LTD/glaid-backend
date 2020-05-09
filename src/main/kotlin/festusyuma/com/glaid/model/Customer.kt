@@ -18,5 +18,5 @@ data class Customer (
         var paymentCard: List<PaymentCard> = listOf(),
 
         @OneToMany
-        var orders: List<Order> = listOf()
+        var orders: List<Orders> = listOf()
 ): Common()

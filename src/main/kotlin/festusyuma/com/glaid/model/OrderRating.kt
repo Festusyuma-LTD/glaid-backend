@@ -8,7 +8,7 @@ import javax.persistence.OneToOne
 data class OrderRating(
 
         @OneToOne
-        val order: Order,
+        val order: Orders,
 
         @ManyToOne
         val user: User,
