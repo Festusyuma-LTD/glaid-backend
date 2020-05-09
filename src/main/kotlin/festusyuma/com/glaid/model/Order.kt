@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
-data class Booking (
+data class Order (
 
         @ManyToOne
         var driver: Driver? = null,

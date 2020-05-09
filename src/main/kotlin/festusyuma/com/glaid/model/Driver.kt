@@ -12,5 +12,5 @@ data class Driver (
         val wallet: Wallet,
 
         @OneToMany
-        val bookings: List<Booking> = listOf()
+        val orders: List<Order> = listOf()
 ): Common()
