@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.model
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import javax.persistence.*
 import javax.validation.constraints.Email
 
@@ -16,5 +17,9 @@ data class User (
         var password: String = "",
 
         @ManyToOne
-        var role: Role? = null
+        var role: Role,
+
+        var active: Boolean = true,
+        var credentialsExpired: Boolean = false,
+        var enabled: Boolean = true
 ): Common()
