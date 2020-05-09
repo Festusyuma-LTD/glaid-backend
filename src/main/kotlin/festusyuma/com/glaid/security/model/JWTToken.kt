@@ -22,5 +22,5 @@ data class JWTToken (
 @Repository
 interface JWTTokenRepo: CrudRepository<JWTToken, Long> {
     fun findByToken(token: String): JWTToken
-    fun findByUserAndExpired(user: User, expired: Boolean = true): JWTToken?
+    fun findByUserAndExpired(user: User, expired: Boolean = false): JWTToken?
 }
