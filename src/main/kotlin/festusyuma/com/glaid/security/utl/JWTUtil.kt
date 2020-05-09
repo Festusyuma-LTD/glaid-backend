@@ -63,7 +63,7 @@ class JWTUtil (
             jwtTokenRepo.save(oldToken)
         }
 
-        val token = JWTToken(token = createToken(userDetails.username, claims))
+        val token = JWTToken(userDetails.user, createToken(userDetails.username, claims), false)
         jwtTokenRepo.save(token)
 
         return token.token
