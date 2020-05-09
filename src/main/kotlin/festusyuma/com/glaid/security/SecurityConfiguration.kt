@@ -28,7 +28,7 @@ class SecurityConfiguration (
                 ?.antMatchers("/admin/**")?.hasRole("ADMIN")
                 ?.antMatchers("/driver/**")?.hasRole("DRIVER")
                 ?.antMatchers("/customer/**")?.hasRole("CUSTOMER")
-                ?.antMatchers("/", "/login")?.permitAll()
+                ?.antMatchers("/", "/login", "/register")?.permitAll()
     }
 
     @Bean
