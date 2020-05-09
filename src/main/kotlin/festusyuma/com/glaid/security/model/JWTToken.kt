@@ -13,13 +13,14 @@ data class JWTToken (
         @ManyToOne
         val user: User? = null,
         val token: String,
-        val expired: Boolean
+        var expired: Boolean = true
 
 ): Common() {
     constructor(): this(token = "", expired = true)
 }
 
 @Repository
-interface JWTTokenRepository: CrudRepository<JWTToken, Long> {
+interface JWTTokenRepo: CrudRepository<JWTToken, Long> {
     fun findByToken(token: String): JWTToken
+    fun findByUserAndExpired(user: User, expired: Boolean = true): JWTToken?
 }
