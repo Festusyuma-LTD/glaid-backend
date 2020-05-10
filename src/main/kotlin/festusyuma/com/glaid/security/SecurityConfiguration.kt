@@ -29,6 +29,9 @@ class SecurityConfiguration (
                 ?.antMatchers("/driver/**")?.hasRole("DRIVER")
                 ?.antMatchers("/customer/**")?.hasRole("CUSTOMER")
                 ?.antMatchers("/", "/login", "/register")?.permitAll()
+                ?.and()?.sessionManagement()
+                ?.sessionCreationPolicy(SessionCreationPolicy.STATELESS)?.and()
+                ?.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)
     }
 
     @Bean

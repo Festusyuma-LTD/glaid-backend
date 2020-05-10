@@ -21,7 +21,7 @@ class JWTRequestFilter(
     override fun doFilterInternal(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain) {
 
         val authorization: String? = req.getHeader("Authorization")
-        if (authorization?.startsWith("Bearer ")!!) {
+        if (authorization?.startsWith("Bearer ") == true) {
             val token = jwtTokenRepo.findByToken(authorization.substring(7))
 
             if (token != null) {
