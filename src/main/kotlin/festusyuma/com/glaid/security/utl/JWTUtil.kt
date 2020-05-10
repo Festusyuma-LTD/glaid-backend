@@ -81,9 +81,14 @@ class JWTUtil (
     fun validateToken(token: JWTToken, email: String): Boolean {
         setClaims(token)
 
-        if (body != null && !isExpired()) {
-            if (getUsername().equals(email)) {
-                return true
+        if (body != null) {
+            if (!isExpired()) {
+                if (getUsername().equals(email)) {
+                    return true
+                }
+            }else {
+                token.expired = true
+                jwtTokenRepo.save(token)
             }
         }
 
