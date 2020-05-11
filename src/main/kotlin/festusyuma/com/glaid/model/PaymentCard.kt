@@ -7,10 +7,6 @@ import javax.persistence.Id
 @Entity
 data class PaymentCard (
 
-        @Id
-        @GeneratedValue
-        val id: Long,
-
         val carNo: String,
         val authorizationCode: String
-)
+): Common()
