@@ -28,6 +28,7 @@ class SecurityConfiguration (
                 ?.antMatchers("/admin/**")?.hasRole("ADMIN")
                 ?.antMatchers("/driver/**")?.hasRole("DRIVER")
                 ?.antMatchers("/customer/**")?.hasRole("CUSTOMER")
+                ?.antMatchers("/change_password")?.authenticated()
                 ?.antMatchers("/", "/login", "/register")?.permitAll()
                 ?.and()?.sessionManagement()
                 ?.sessionCreationPolicy(SessionCreationPolicy.STATELESS)?.and()
