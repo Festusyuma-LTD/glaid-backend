@@ -50,7 +50,7 @@ class JWTUtil (
 
     fun generateToken(userDetails: UserDetails): String {
         val claims = Jwts.claims()
-        claims["user"] = when(userDetails.user.role.role) {
+        claims["user"] = when(userDetails.user.role?.role) {
             "ADMIN" -> userDetails.user
             "DRIVER" -> driverRepo.findByUser(userDetails.user)
             "CUSTOMER" -> customerRepo.findByUser(userDetails.user)

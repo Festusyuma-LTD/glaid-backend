@@ -11,13 +11,11 @@ data class User (
         @Column(unique = true)
         var email: String,
 
-        var firstName: String = "",
-        var lastName: String = "",
-        var otherNames: String = "",
+        var fullName: String = "",
         var password: String = "",
 
         @ManyToOne
-        var role: Role,
+        var role: Role? = null,
 
         var active: Boolean = true,
         var credentialsExpired: Boolean = false,

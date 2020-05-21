@@ -25,11 +25,11 @@ class SecurityConfiguration (
     override fun configure(http: HttpSecurity?) {
 
         http?.csrf()?.disable()?.authorizeRequests()
+                ?.antMatchers("/", "/login", "/customer/register")?.permitAll()
                 ?.antMatchers("/admin/**")?.hasRole("ADMIN")
                 ?.antMatchers("/driver/**")?.hasRole("DRIVER")
                 ?.antMatchers("/customer/**")?.hasRole("CUSTOMER")
                 ?.antMatchers("/change_password")?.authenticated()
-                ?.antMatchers("/", "/login", "/register")?.permitAll()
                 ?.and()?.sessionManagement()
                 ?.sessionCreationPolicy(SessionCreationPolicy.STATELESS)?.and()
                 ?.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)

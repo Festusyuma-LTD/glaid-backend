@@ -7,9 +7,6 @@ fun response(status: HttpStatus = HttpStatus.OK, message: String = "success", da
     return ResponseEntity.ok(Response(status.value(), message, data))
 }
 
-fun serviceResponse(status:Boolean = true, data: Any?): Map<String, Any?> {
-    return mapOf(
-            "status" to status,
-            "data" to data
-    )
+fun serviceResponse(status: Int = 200, message: String = "success", data: Any? = null): Response {
+    return Response(status, message, data)
 }
