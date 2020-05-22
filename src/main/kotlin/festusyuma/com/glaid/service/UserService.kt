@@ -1,11 +1,10 @@
 package festusyuma.com.glaid.service
 
-import festusyuma.com.glaid.model.RegistrationOTP
+import festusyuma.com.glaid.model.UserOTP
 import festusyuma.com.glaid.model.User
-import festusyuma.com.glaid.repository.RegistrationOTPRepo
+import festusyuma.com.glaid.repository.UserOTPRepo
 import festusyuma.com.glaid.repository.UserRepo
 import festusyuma.com.glaid.util.*
-import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -14,7 +13,7 @@ class UserService(
         private val passwordEncoder: PasswordEncoder,
         private val twilioService: TwilioService,
         private val userRepo: UserRepo,
-        private val otpRepo: RegistrationOTPRepo
+        private val otpRepo: UserOTPRepo
 ) {
     private val errorMessage: String = "An unknown error occurred"
 
@@ -29,7 +28,7 @@ class UserService(
             var userOTP = otpRepo.findByEmailAndExpired(user.email)
             if (userOTP != null) userOTP.expired = true
 
-            userOTP = RegistrationOTP(getOtp(), user.email)
+            userOTP = UserOTP(getOtp(), user.email)
             otpRepo.save(userOTP)
             twilioService.sendSMS(userOTP.otp, addCountryCode(user.tel))
 
