@@ -36,7 +36,7 @@ class UserService(
             return serviceResponse(message = "verification")
         }else {
             otpRepo.findByOtpAndEmailAndExpired(otp, user.email)
-                    ?: return serviceResponse(message = "Invalid OTP")
+                    ?: return serviceResponse(401, message = "Invalid OTP")
         }
 
         user.password = passwordEncoder.encode(user.password)
