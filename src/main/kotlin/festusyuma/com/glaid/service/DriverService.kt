@@ -1,9 +1,7 @@
 package festusyuma.com.glaid.service
 
 import festusyuma.com.glaid.model.Driver
-import festusyuma.com.glaid.model.GasTruck
 import festusyuma.com.glaid.repository.DriverRepo
-import festusyuma.com.glaid.repository.TruckRepo
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.serviceResponse
 import org.springframework.data.repository.findByIdOrNull
