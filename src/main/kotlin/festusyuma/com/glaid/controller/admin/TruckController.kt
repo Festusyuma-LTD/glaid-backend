@@ -38,7 +38,7 @@ class TruckController(
         return response()
     }
 
-    @GetMapping("assignDriver/{truckId}/{driverId}")
+    @GetMapping("assign_driver/{truckId}/{driverId}")
     fun assignDriver(@PathVariable driverId: Long, @PathVariable truckId: Long): ResponseEntity<Response> {
         val req = service.assignDriver(driverId, truckId)
 
