@@ -6,7 +6,6 @@ import festusyuma.com.glaid.repository.UserRepo
 import festusyuma.com.glaid.security.utl.PasswordResetRequest
 import festusyuma.com.glaid.service.UserOTPService
 import festusyuma.com.glaid.util.Response
-import festusyuma.com.glaid.util.response
 import festusyuma.com.glaid.util.serviceResponse
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
