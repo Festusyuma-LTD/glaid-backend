@@ -1,6 +1,5 @@
 package festusyuma.com.glaid.service
 
-import festusyuma.com.glaid.model.UserOTP
 import festusyuma.com.glaid.model.User
 import festusyuma.com.glaid.repository.UserOTPRepo
 import festusyuma.com.glaid.repository.UserRepo
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
         private val passwordEncoder: PasswordEncoder,
-        private val twilioService: TwilioService,
+        private val otpService: UserOTPService,
         private val userRepo: UserRepo,
         private val otpRepo: UserOTPRepo
 ) {
@@ -25,13 +24,7 @@ class UserService(
         }
 
         if (otp == null) {
-            var userOTP = otpRepo.findByEmailAndExpired(user.email)
-            if (userOTP != null) userOTP.expired = true
-
-            userOTP = UserOTP(getOtp(), user.email)
-            otpRepo.save(userOTP)
-            twilioService.sendSMS(userOTP.otp, addCountryCode(user.tel))
-
+            otpService.sendOtpToNumber(user)
             return serviceResponse(message = "verification")
         }else {
             otpRepo.findByOtpAndEmailAndExpired(otp, user.email)
