@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.security.controller
 
+import festusyuma.com.glaid.dto.UserOTPRequest
 import festusyuma.com.glaid.repository.UserRepo
 import festusyuma.com.glaid.security.UserDetailsService
 import festusyuma.com.glaid.security.UserPasswordService
@@ -7,6 +8,7 @@ import festusyuma.com.glaid.security.model.AuthenticateRequest
 import festusyuma.com.glaid.security.model.PasswordUpdateRequest
 import festusyuma.com.glaid.security.utl.JWTUtil
 import festusyuma.com.glaid.security.utl.PasswordResetRequest
+import festusyuma.com.glaid.service.UserOTPService
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
 import org.springframework.http.HttpStatus
@@ -25,6 +27,7 @@ class Authenticate (
         private val authManager: AuthenticationManager,
         private val userDetailsService: UserDetailsService,
         private val userPasswordService: UserPasswordService,
+        private val otpService: UserOTPService,
         private val jwtUtil: JWTUtil,
         private val userRepo: UserRepo,
         private val passwordEncoder: PasswordEncoder
@@ -70,5 +73,13 @@ class Authenticate (
         }
 
         return response(HttpStatus.BAD_REQUEST, req.message, req.data)
+    }
+
+    @PostMapping("/validate_otp")
+    fun validateOtp(@RequestBody userOTPRequest: UserOTPRequest): ResponseEntity<Response> {
+        val req = otpService.validateOtp(userOTPRequest)
+        return if (req.status == 200) {
+            response(message = req.message)
+        }else response(HttpStatus.BAD_REQUEST, req.message)
     }
 }

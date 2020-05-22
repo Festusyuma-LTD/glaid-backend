@@ -25,7 +25,7 @@ class SecurityConfiguration (
     override fun configure(http: HttpSecurity?) {
 
         http?.csrf()?.disable()?.authorizeRequests()
-                ?.antMatchers("/", "/login", "/customer/register", "reset_password")?.permitAll()
+                ?.antMatchers("/", "/login", "/customer/register", "reset_password", "/validate_otp")?.permitAll()
                 ?.antMatchers("/admin/**")?.hasRole("ADMIN")
                 ?.antMatchers("/driver/**")?.hasRole("DRIVER")
                 ?.antMatchers("/customer/**")?.hasRole("CUSTOMER")
