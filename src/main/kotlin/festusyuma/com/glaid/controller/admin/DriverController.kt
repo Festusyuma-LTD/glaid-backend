@@ -37,12 +37,12 @@ class DriverController(
 
     @GetMapping("list/approved")
     fun getApprovedDrivers(): ResponseEntity<Response> {
-        return response()
+        return response(data = service.getByApproved(true))
     }
 
     @GetMapping("list/unapproved")
     fun getUnApprovedDrivers(): ResponseEntity<Response> {
-        return response()
+        return response(data = service.getByApproved(false))
     }
 
     @GetMapping("list/online")
@@ -51,15 +51,21 @@ class DriverController(
     }
 
     @GetMapping("approve/{driverId}")
-    fun approveDriver(@PathVariable driverId: String): ResponseEntity<Response> {
+    fun approveDriver(@PathVariable driverId: Long): ResponseEntity<Response> {
+        val req = service.approveDriver(driverId)
 
-        return response()
+        return if(req.status == 200) {
+            response(message = req.message)
+        }else response(HttpStatus.BAD_REQUEST, message = req.message)
     }
 
     @GetMapping("revoke_approval/{driverId}")
-    fun revokeDriverApproval(@PathVariable driverId: String): ResponseEntity<Response> {
+    fun revokeDriverApproval(@PathVariable driverId: Long): ResponseEntity<Response> {
+        val req = service.approveDriver(driverId, false)
 
-        return response()
+        return if(req.status == 200) {
+            response(message = req.message)
+        }else response(HttpStatus.BAD_REQUEST, message = req.message)
     }
 
     @GetMapping("assignTruck/{driverId}/{truckId}")
