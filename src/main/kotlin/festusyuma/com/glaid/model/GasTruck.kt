@@ -12,5 +12,5 @@ data class GasTruck (
         var color: String,
 
         @OneToOne
-        var driver: Driver
+        var driver: Driver? = null
 ): Common()
