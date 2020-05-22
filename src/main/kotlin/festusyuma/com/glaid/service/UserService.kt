@@ -42,4 +42,8 @@ class UserService(
     fun updateUser(user: User): Response {
         return serviceResponse(data = user)
     }
+
+    fun searchUser(query: String): List<User> {
+        return userRepo.search(query)
+    }
 }

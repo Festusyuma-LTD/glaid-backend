@@ -1,6 +1,7 @@
 package festusyuma.com.glaid.controller.admin
 
 import festusyuma.com.glaid.repository.DriverRepo
+import festusyuma.com.glaid.service.DriverService
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
 import org.springframework.data.repository.findByIdOrNull
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController("admin/driver")
 @RequestMapping("admin/driver")
 class DriverController(
+        private val service: DriverService,
         private val driverRepo: DriverRepo
 ) {
 
@@ -30,7 +32,7 @@ class DriverController(
 
     @GetMapping("search/{query}")
     fun searchDrivers(@PathVariable query: String): ResponseEntity<Response> {
-        return response()
+        return response(data = service.search(query))
     }
 
     @GetMapping("list/approved")

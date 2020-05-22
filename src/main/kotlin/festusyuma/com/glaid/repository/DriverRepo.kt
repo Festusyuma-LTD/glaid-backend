@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface DriverRepo: CrudRepository<Driver, Long> {
     fun findByUser(user: User): Driver
+    fun findByUserIn(users: List<User>): List<Driver>
 }

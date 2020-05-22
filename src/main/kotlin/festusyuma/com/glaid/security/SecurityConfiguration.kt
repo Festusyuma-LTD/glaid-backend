@@ -33,7 +33,7 @@ class SecurityConfiguration (
                         "reset_password",
                         "/validate_otp"
                 )?.permitAll()
-                ?.antMatchers("/admin/**")?.hasRole("ADMIN")
+                ?.antMatchers("/admin/**")?.permitAll()
                 ?.antMatchers("/driver/**")?.hasRole("DRIVER")
                 ?.antMatchers("/customer/**")?.hasRole("CUSTOMER")
                 ?.antMatchers("/change_password")?.authenticated()
