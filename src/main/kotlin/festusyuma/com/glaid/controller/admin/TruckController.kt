@@ -34,6 +34,7 @@ class TruckController(
 
     @GetMapping("{truckId}/track")
     fun track(@PathVariable truckId: String): ResponseEntity<Response> {
+        //todo track truck
         return response()
     }
 }
