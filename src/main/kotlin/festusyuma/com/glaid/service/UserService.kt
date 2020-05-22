@@ -17,11 +17,11 @@ class UserService(
     private val errorMessage: String = "An unknown error occurred"
 
     fun createUser(user: User, otp: String? = null): Response {
-        val existingUser = userRepo.findByEmail(user.email)
+        val existingUserEmail = userRepo.findByEmail(user.email)
+        val existingUserPhone = userRepo.findByTel(user.tel)
 
-        if (existingUser != null) {
-            return serviceResponse(400, message = "Email already exist")
-        }
+        if (existingUserEmail != null) return serviceResponse(400, message = "Email already registered")
+        if (existingUserPhone != null) return serviceResponse(400, message = "Phone number already registered")
 
         if (otp == null) {
             otpService.sendOtpToNumber(user)

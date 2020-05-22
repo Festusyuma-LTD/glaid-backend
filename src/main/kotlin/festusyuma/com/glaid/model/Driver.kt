@@ -11,6 +11,8 @@ data class Driver (
         @OneToOne
         val wallet: Wallet,
 
+        var approved: Boolean = false,
+
         @OneToMany
-        val orders: List<Orders> = listOf()
+        var orders: List<Orders> = listOf()
 ): Common()

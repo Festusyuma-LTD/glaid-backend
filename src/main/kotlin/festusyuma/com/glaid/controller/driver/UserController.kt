@@ -1,7 +1,7 @@
-package festusyuma.com.glaid.controller.customer
+package festusyuma.com.glaid.controller.driver
 
 import festusyuma.com.glaid.dto.UserRequest
-import festusyuma.com.glaid.service.CustomerAccountService
+import festusyuma.com.glaid.service.DriverAccountService
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
 import org.springframework.http.HttpStatus
@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@RestController("customer/account")
-@RequestMapping("customer")
-class UserController (
-        val accountService: CustomerAccountService
+@RestController("driver/account")
+@RequestMapping("driver")
+class UserController(
+        private val accountService: DriverAccountService
 ) {
 
     @PostMapping("register")

@@ -1,6 +1,6 @@
 package festusyuma.com.glaid.dto
 
-data class CustomerRequest (
+data class UserRequest (
 
         val fullName: String,
         val email: String,
