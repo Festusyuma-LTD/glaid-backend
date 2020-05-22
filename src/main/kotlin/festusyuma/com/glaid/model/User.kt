@@ -13,6 +13,7 @@ data class User (
 
         var fullName: String = "",
         var password: String = "",
+        var tel: String = "",
 
         @ManyToOne
         var role: Role? = null,

@@ -22,7 +22,7 @@ class UserController (
         val res = accountService.register(customerRequest)
 
         return if(res.status == 200) {
-            response(message = "User registration successful")
+            response(message = res.message, data = res.data)
         }else response(HttpStatus.BAD_REQUEST, message = res.message, data = res.data)
     }
 }

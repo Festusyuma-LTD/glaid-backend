@@ -29,17 +29,22 @@ class CustomerAccountService(
                 ?: return serviceResponse(400, message = errorMessage)
 
         user.fullName = customerRequest.fullName
+        user.tel = customerRequest.tel
         user.password = customerRequest.password
         user.role = role
 
-        val createUserResp = userService.createUser(user)
+        val createUserResp = userService.createUser(user, customerRequest.otp)
         return if (createUserResp.status == 200) {
-            user = createUserResp.data as User
-            val wallet = walletRepo.save(Wallet())
-            val customer = Customer(user, wallet)
-            customerRepo.save(customer)
+            if (createUserResp.message == "verification") {
+                serviceResponse(message = createUserResp.message, data = createUserResp.data)
+            }else {
+                user = createUserResp.data as User
+                val wallet = walletRepo.save(Wallet())
+                val customer = Customer(user, wallet)
+                customerRepo.save(customer)
 
-            serviceResponse()
+                serviceResponse(message = "User registration successful")
+            }
         }else createUserResp
     }
 }
