@@ -67,10 +67,4 @@ class DriverController(
             response(message = req.message)
         }else response(HttpStatus.BAD_REQUEST, message = req.message)
     }
-
-    @GetMapping("assignTruck/{driverId}/{truckId}")
-    fun assignTruck(@PathVariable driverId: String, @PathVariable truckId: String): ResponseEntity<Response> {
-
-        return response()
-    }
 }

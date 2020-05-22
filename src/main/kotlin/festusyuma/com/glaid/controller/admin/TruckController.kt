@@ -37,4 +37,13 @@ class TruckController(
         //todo track truck
         return response()
     }
+
+    @GetMapping("assignDriver/{truckId}/{driverId}")
+    fun assignDriver(@PathVariable driverId: Long, @PathVariable truckId: Long): ResponseEntity<Response> {
+        val req = service.assignDriver(driverId, truckId)
+
+        return if(req.status == 200) {
+            response(message = req.message)
+        }else response(HttpStatus.BAD_REQUEST, message = req.message)
+    }
 }
