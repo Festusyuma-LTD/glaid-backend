@@ -4,6 +4,7 @@ import festusyuma.com.glaid.model.User
 import festusyuma.com.glaid.repository.UserOTPRepo
 import festusyuma.com.glaid.repository.UserRepo
 import festusyuma.com.glaid.util.*
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -45,5 +46,10 @@ class UserService(
 
     fun searchUser(query: String): List<User> {
         return userRepo.search(query)
+    }
+
+    fun getLoggedInUser(): User? {
+        val email = SecurityContextHolder.getContext().authentication.name
+        return userRepo.findByEmail(email)
     }
 }
