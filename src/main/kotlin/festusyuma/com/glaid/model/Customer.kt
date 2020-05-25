@@ -15,7 +15,7 @@ data class Customer (
         var address: MutableList<Address> = mutableListOf(),
 
         @OneToMany
-        var paymentCard: MutableList<PaymentCard> = mutableListOf(),
+        var paymentCards: MutableList<PaymentCard> = mutableListOf(),
 
         @OneToMany
         var orders: MutableList<Orders> = mutableListOf()
