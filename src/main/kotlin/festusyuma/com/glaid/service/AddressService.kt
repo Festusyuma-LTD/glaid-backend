@@ -2,6 +2,7 @@ package festusyuma.com.glaid.service
 
 import festusyuma.com.glaid.dto.AddressRequest
 import festusyuma.com.glaid.model.Address
+import festusyuma.com.glaid.model.Customer
 import festusyuma.com.glaid.model.Location
 import festusyuma.com.glaid.model.User
 import festusyuma.com.glaid.repository.AddressRepo
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class AddressService(
-        private val userService: UserService,
+        private val customerService: CustomerService,
         private val locationRepo: LocationRepo,
         private val addressRepo: AddressRepo,
         private val customerRepo: CustomerRepo
@@ -23,9 +24,7 @@ class AddressService(
     private val addressTypes = listOf("work", "business")
 
     fun save(addressRequest: AddressRequest): Response {
-        val user: User = userService.getLoggedInUser()?: return serviceResponse(400, "an unknown error occurred")
-        val customer = customerRepo.findByUser(user)
-
+        val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
         val address = if (addressRequest.id != null) {
             addressRepo.findByIdOrNull(addressRequest.id)?: return serviceResponse(message = "Invalid address id")
         }else Address()
@@ -47,5 +46,31 @@ class AddressService(
         customerRepo.save(customer)
 
         return serviceResponse(message = "Address saved")
+    }
+
+    fun list(): Response {
+        val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
+        return serviceResponse(data = customer.address)
+    }
+
+    fun getDetails(addressId: Long): Response {
+        val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
+        val address = addressRepo.findByIdOrNull(addressId)?: return serviceResponse(400, "invalid address id")
+
+        return if (address in customer.address) {
+            serviceResponse(data = address)
+        }else serviceResponse(400, "invalid address id")
+    }
+
+    fun remove(addressId: Long): Response {
+        val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
+        val address = addressRepo.findByIdOrNull(addressId)?: return serviceResponse(400, "invalid address id")
+
+        return if (address in customer.address) {
+            customer.address.remove(address)
+            customerRepo.save(customer)
+
+            serviceResponse(message = "address removed")
+        }else serviceResponse(400, "invalid address id")
     }
 }

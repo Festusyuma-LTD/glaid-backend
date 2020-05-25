@@ -24,33 +24,38 @@ class PaymentCardService(
     private lateinit var paystackSecretKey: String
 
     fun getUserPaymentCards(): Response {
-        val customerReq = customerService.getLoggedInCustomer()
-        val customer = customerReq.data as Customer
+        val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
         return serviceResponse(data = customer.paymentCards)
     }
 
     fun getUserPaymentCard(cardId: Long): Response {
         val card = paymentCardRepo.findByIdOrNull(cardId)?: return serviceResponse(400, "invalid card id")
-        return serviceResponse(data = card)
+        val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
+
+        return if (card in customer.paymentCards) {
+            serviceResponse(data = card)
+        }else serviceResponse(400, "invalid card id")
     }
 
     fun removeUserPaymentCard(cardId: Long): Response {
         val card = paymentCardRepo.findByIdOrNull(cardId)?: return serviceResponse(400, "invalid card id")
-        val customerReq = customerService.getLoggedInCustomer()
-        val customer = customerReq.data as Customer
+        val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
 
-        customer.paymentCards.remove(card)
-        customerRepo.save(customer)
-        paymentCardRepo.delete(card)
+        return if (card in customer.paymentCards) {
+            customer.paymentCards.remove(card)
+            customerRepo.save(customer)
 
-        return serviceResponse(message = "Card removed")
+            card.authorizationCode = ""
+            paymentCardRepo.save(card)
+
+            return serviceResponse(message = "Card removed")
+        }else serviceResponse(400, "invalid card id")
     }
 
     fun saveCard(paymentCardRequest: PaymentCardRequest): Response {
         val isReusable = paymentService.authorizationIsReusable(paymentCardRequest.reference)
         val paystackTransactionReq = paymentService.getPaystackTransactionDTO(paymentCardRequest.reference)
-        val customerReq = customerService.getLoggedInCustomer()
-        val customer = customerReq.data as Customer
+        val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
 
         if (isReusable && paystackTransactionReq.status == 200) {
             val paystackTransaction = paystackTransactionReq.data as PaystackTransaction
