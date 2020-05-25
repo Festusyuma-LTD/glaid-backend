@@ -8,10 +8,6 @@ import javax.persistence.OneToOne
 @Entity
 data class Payment (
 
-        @Id
-        @GeneratedValue
-        val id: Long? = null,
-
         val amount: Double,
         var type: String = "",
         var reference: String = "",
@@ -19,4 +15,4 @@ data class Payment (
 
         @OneToOne
         val paymentCard: PaymentCard? = null
-)
+): Common()

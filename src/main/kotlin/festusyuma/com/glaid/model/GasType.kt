@@ -5,8 +5,9 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @Entity
-data class Wallet (
+data class GasType (
 
-        var wallet: Double = 0.0,
-        var bonus: Double = 0.0
+        var type: String = "",
+        var price: Double = 0.0,
+        var unit: String = "liters"
 ): Common()

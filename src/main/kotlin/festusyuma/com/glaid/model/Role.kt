@@ -6,10 +6,5 @@ import javax.persistence.Id
 
 @Entity
 data class Role (
-
-        @Id
-        @GeneratedValue
-        val id: Long? = null,
-
         val role: String
-)
+): Common()

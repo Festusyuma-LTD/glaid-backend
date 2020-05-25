@@ -5,10 +5,6 @@ import javax.persistence.*
 @Entity
 data class Customer (
 
-        @Id
-        @GeneratedValue
-        val id: Long,
-
         @OneToOne
         val user: User,
 
@@ -16,9 +12,11 @@ data class Customer (
         val wallet: Wallet,
 
         @OneToMany
-        var address: List<Address> = listOf(),
+        var address: MutableList<Address> = mutableListOf(),
 
         @OneToMany
-        var paymentCard: List<PaymentCard> = listOf()
-) {
-}
+        var paymentCards: MutableList<PaymentCard> = mutableListOf(),
+
+        @OneToMany
+        var orders: MutableList<Orders> = mutableListOf()
+): Common()

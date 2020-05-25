@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
@@ -7,10 +8,10 @@ import javax.persistence.Id
 @Entity
 data class PaymentCard (
 
-        @Id
-        @GeneratedValue
-        val id: Long,
-
         val carNo: String,
-        val authorizationCode: String
-)
+        val expMonth: String,
+        val expYear: String,
+
+        @JsonIgnore
+        var authorizationCode: String
+): Common()
