@@ -8,5 +8,6 @@ import javax.persistence.Id
 data class GasType (
 
         var type: String = "",
-        var price: Double = 0.0
+        var price: Double = 0.0,
+        var unit: String = "liters"
 ): Common()
