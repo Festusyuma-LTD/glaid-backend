@@ -16,7 +16,7 @@ class AddressController(
 
     @PostMapping("save")
     fun saveAddress(@RequestBody addressRequest: AddressRequest): ResponseEntity<Response> {
-        val req = service.save(addressRequest)
+        val req = service.saveCustomerAddress(addressRequest)
 
         return if(req.status == 200) {
             response(message = req.message)
@@ -25,7 +25,7 @@ class AddressController(
 
     @GetMapping("list")
     fun getAddresses(): ResponseEntity<Response> {
-        val req = service.list()
+        val req = service.listCustomerAddresses()
 
         return if(req.status == 200) {
             response(data = req.data)
@@ -34,7 +34,7 @@ class AddressController(
 
     @GetMapping("{addressId}")
     fun getAddress(@PathVariable addressId: Long): ResponseEntity<Response> {
-        val req = service.getDetails(addressId)
+        val req = service.getCustomerAddressDetails(addressId)
 
         return if(req.status == 200) {
             response(data = req.data)
@@ -43,7 +43,7 @@ class AddressController(
 
     @GetMapping("{addressId}/remove")
     fun removeAddress(@PathVariable addressId: Long): ResponseEntity<Response> {
-        val req = service.remove(addressId)
+        val req = service.removeCustomerAddress(addressId)
 
         return if(req.status == 200) {
             response(message = req.message)
