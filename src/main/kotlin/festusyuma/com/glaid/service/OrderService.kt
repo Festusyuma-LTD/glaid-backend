@@ -107,7 +107,23 @@ class OrderService(
     }
 
     fun getCustomerOrders(): Response {
+        val customer = customerService.getLoggedInCustomer()
+                ?: return serviceResponse(400, "an unknown error occurred")
 
-        return serviceResponse()
+        return serviceResponse(data = orderRepo.findByCustomer(customer))
+    }
+
+    fun getCustomerOrderDetails(orderId: Long): Response {
+        val customer = customerService.getLoggedInCustomer()
+                ?: return serviceResponse(400, "an unknown error occurred")
+        val order = orderRepo.findByIdOrNull(orderId)
+                ?: return serviceResponse(400, "invalid order id")
+
+        return if (order.customer == customer) {
+            return serviceResponse(data = mapOf(
+                    "order" to order,
+                    "trackingId" to null
+            ))
+        }else serviceResponse(400, "invalid order id")
     }
 }
