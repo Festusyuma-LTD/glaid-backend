@@ -1,9 +1,9 @@
 package festusyuma.com.glaid.repository
 
-import festusyuma.com.glaid.model.DeliveryStatus
+import festusyuma.com.glaid.model.OrderStatus
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface DeliveryStatusRepo: CrudRepository<DeliveryStatus, Long> {
+interface OrderStatusRepo: CrudRepository<OrderStatus, Long> {
 }

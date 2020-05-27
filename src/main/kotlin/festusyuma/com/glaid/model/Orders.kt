@@ -31,5 +31,5 @@ data class Orders(
         var scheduledDate: LocalDateTime = LocalDateTime.now(),
 
         @ManyToOne
-        var status: DeliveryStatus
+        var status: OrderStatus
 ): Common()

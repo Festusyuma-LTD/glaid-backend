@@ -2,12 +2,13 @@ package festusyuma.com.glaid.service
 
 import festusyuma.com.glaid.dto.AddressRequest
 import festusyuma.com.glaid.dto.OrderRequest
+import festusyuma.com.glaid.dto.PaystackTransaction
 import festusyuma.com.glaid.model.Address
 import festusyuma.com.glaid.model.Orders
 import festusyuma.com.glaid.model.Payment
+import festusyuma.com.glaid.model.PaymentCard
 import festusyuma.com.glaid.repository.*
 import festusyuma.com.glaid.util.Response
-import festusyuma.com.glaid.util.response
 import festusyuma.com.glaid.util.serviceResponse
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -20,9 +21,9 @@ class OrderService(
         private val addressService: AddressService,
         private val gasRepo: GasRepo,
         private val orderRepo: OrderRepo,
-        private val addressRepo: AddressRepo,
-        private val deliveryStatusRepo: DeliveryStatusRepo,
-        private val paymentRepo: PaymentRepo
+        private val orderStatusRepo: OrderStatusRepo,
+        private val paymentRepo: PaymentRepo,
+        private val walletRepo: WalletRepo
 ) {
 
     fun createOrder(orderRequest: OrderRequest): Response {
@@ -40,6 +41,10 @@ class OrderService(
             val deliveryAddress = getDeliveryAddress(orderRequest.deliveryAddress)
                     ?: return serviceResponse(400, "invalid delivery address")
 
+            if (deliveryAddress.type == "business" && orderRequest.quantity < getMinimumBusinessDelivery()) {
+                return serviceResponse(400, "Business orders have to be a minimum of 5000 liters")
+            }
+
             val order = Orders(
                     customer = customer,
                     gasType = gasType,
@@ -49,15 +54,18 @@ class OrderService(
                     deliveryPrice = delivery,
                     tax = tax,
                     scheduledDate = orderRequest.scheduledDate,
-                    status = deliveryStatusRepo.findByIdOrNull(1)?: return serviceResponse(400, "an unknown error occurred")
+                    status = orderStatusRepo.findByIdOrNull(1)?: return serviceResponse(400, "an unknown error occurred")
             )
 
             setOrderPayment(order, orderRequest)
 
-            return if (order.payment?.status == "success" || order.payment?.type == "on_delivery") {
-                orderRepo.save(order)
-                serviceResponse(message = "order placed", data = order)
-            }else serviceResponse(400, order.payment?.status?: "an unknown error occurred")
+            if (order.payment != null) {
+                return if (order.payment?.status == "success" || order.payment?.type == "on_delivery") {
+                    paymentRepo.save(order.payment!!)
+                    orderRepo.save(order)
+                    serviceResponse(message = "order placed", data = order)
+                }else serviceResponse(400, order.payment?.status?: "an unknown error occurred")
+            }
         }
 
         return serviceResponse(400, "an unknown error occurred")
@@ -71,6 +79,10 @@ class OrderService(
     fun getTaxPrice(total: Double): Double {
         //todo implement tax price
         return 0.0
+    }
+
+    fun getMinimumBusinessDelivery():Double {
+        return 5000.0
     }
 
     fun getDeliveryAddress(addressRequest: AddressRequest): Address? {
@@ -94,16 +106,58 @@ class OrderService(
         order.payment = payment
 
         when (payment.type) {
-            "card" -> chargeCard(payment)
+            "card" -> chargeCard(payment, orderRequest)
             "wallet" -> chargeWallet(payment)
             else -> return
         }
     }
 
-    fun chargeCard(payment: Payment) {
+    fun chargeCard(payment: Payment, orderRequest: OrderRequest) {
+
+        if (orderRequest.paymentCardId == null) return
+        val cardReq = paymentCardService.getUserPaymentCard(orderRequest.paymentCardId)
+        val customer = customerService.getLoggedInCustomer()?: return
+
+        if (cardReq.status == 200) {
+            val card = cardReq.data as PaymentCard
+            val debitReq = paymentService.chargeCard(card.authorizationCode, payment.amount, customer.user)
+            if (debitReq.data == null) return
+
+            val transaction = debitReq.data as PaystackTransaction
+            if (debitReq.status == 200) {
+                payment.status = "success"
+            }else payment.status = "failed: ${transaction.gatewayResponse}"
+            payment.paymentCard = card
+
+            return
+        }
+
+        payment.status = "failed: an unknown error occurred"
     }
 
     fun chargeWallet(payment: Payment) {
+        val customer = customerService.getLoggedInCustomer()?: return
+        val wallet = customer.wallet
+        var amount = payment.amount
+
+        if (wallet.wallet + wallet.bonus < amount) {
+            payment.status = "failed: insufficient funds"
+            return
+        }
+
+        if (wallet.bonus >= amount) {
+            wallet.bonus -= amount
+            walletRepo.save(wallet)
+            payment.status = "success"
+
+            return
+        }
+
+        wallet.bonus = 0.0
+        amount -= wallet.bonus
+        wallet.wallet -= amount
+        payment.status = "success"
+        walletRepo.save(wallet)
     }
 
     fun getCustomerOrders(): Response {
