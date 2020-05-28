@@ -27,4 +27,11 @@ class GasService(
 
         return serviceResponse(message = "Gas Type saved")
     }
+
+    fun listGasByType(type: String): Response {
+        val gasType = gasRepo.findByType(type)?:
+                return serviceResponse(400, "invalid gas type")
+
+        return serviceResponse(data = gasType)
+    }
 }

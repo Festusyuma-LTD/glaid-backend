@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
-data class Orders (
+data class Orders(
 
         @ManyToOne
         var driver: Driver? = null,
@@ -16,20 +16,20 @@ data class Orders (
         val customer: Customer,
 
         @OneToOne
-        val payment: Payment,
+        var payment: Payment? = null,
 
         @OneToOne
         val gasType: GasType,
 
         @OneToOne
-        val shippingAddress: Address,
+        val deliveryAddress: Address,
 
-        val quantity: Int,
+        val quantity: Double,
         var amount: Double,
         var deliveryPrice: Double,
         var tax: Double,
         var scheduledDate: LocalDateTime = LocalDateTime.now(),
 
         @ManyToOne
-        var status: DeliveryStatus
+        var status: OrderStatus
 ): Common()

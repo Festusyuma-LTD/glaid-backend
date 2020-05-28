@@ -14,5 +14,5 @@ data class Payment (
         var status: String = "",
 
         @OneToOne
-        val paymentCard: PaymentCard? = null
+        var paymentCard: PaymentCard? = null
 ): Common()

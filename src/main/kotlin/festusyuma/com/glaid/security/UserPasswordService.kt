@@ -32,8 +32,6 @@ class UserPasswordService(
             else -> return serviceResponse(400, message = "An error occurred")
         }
 
-        print(user)
-
         if (passwordResetRequest.otp != null) {
             val otp = otpRepo.findByOtpAndEmailAndExpired(passwordResetRequest.otp, user.email)
                     ?: return serviceResponse(401, message = "Invalid OTP")
