@@ -1,6 +1,5 @@
 package festusyuma.com.glaid.controller.customer
 
-import festusyuma.com.glaid.service.CustomerAccountService
 import festusyuma.com.glaid.service.CustomerService
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
