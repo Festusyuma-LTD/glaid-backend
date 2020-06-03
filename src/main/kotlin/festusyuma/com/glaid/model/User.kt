@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.sun.org.apache.xpath.internal.operations.Bool
 import javax.persistence.*
 import javax.validation.constraints.Email
@@ -12,6 +13,8 @@ data class User (
         var email: String,
 
         var fullName: String = "",
+
+        @JsonIgnore
         var password: String = "",
         var tel: String = "",
 

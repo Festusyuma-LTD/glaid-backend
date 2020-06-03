@@ -23,7 +23,7 @@ class GasController(
         return if (req.status == 200) {
             val data = mutableMapOf(
                     "gasType" to req.data,
-                    "predefinedQuantities" to listOf(50, 100)
+                    "predefinedQuantities" to listOf(50.0, 100.0)
             )
 
             response(data = data)
