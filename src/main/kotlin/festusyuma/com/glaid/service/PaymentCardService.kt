@@ -74,6 +74,8 @@ class PaymentCardService(
         body["email"] = customer.user.email
 
         val entity = HttpEntity(body, httpHeaders)
+        println(entity.headers)
+        println(entity.body)
 
         val response = restTemplate.exchange(
                 "https://api.paystack.co/transaction/initialize",
