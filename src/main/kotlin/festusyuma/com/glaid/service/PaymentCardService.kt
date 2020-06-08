@@ -1,23 +1,31 @@
 package festusyuma.com.glaid.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import festusyuma.com.glaid.dto.PaymentCardRequest
 import festusyuma.com.glaid.dto.PaystackTransaction
 import festusyuma.com.glaid.model.Customer
+import festusyuma.com.glaid.model.Payment
 import festusyuma.com.glaid.model.PaymentCard
 import festusyuma.com.glaid.repository.CustomerRepo
 import festusyuma.com.glaid.repository.PaymentCardRepo
+import festusyuma.com.glaid.repository.PaymentRepo
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.serviceResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestTemplate
 
 @Service
 class PaymentCardService(
         private val paymentService: PaymentService,
         private val customerService: CustomerService,
         private val paymentCardRepo: PaymentCardRepo,
-        private val customerRepo: CustomerRepo
+        private val customerRepo: CustomerRepo,
+        private val paymentRepo: PaymentRepo
 ) {
 
     @Value("\${paystack.secret}")
@@ -50,6 +58,46 @@ class PaymentCardService(
 
             return serviceResponse(message = "Card removed")
         }else serviceResponse(400, "invalid card id")
+    }
+
+    fun saveCardInit(): Response {
+        val customer = customerService.getLoggedInCustomer()
+                ?: return serviceResponse(400, "an unknown error occurred")
+
+        val restTemplate = RestTemplate()
+        val httpHeaders = HttpHeaders()
+        httpHeaders.setBearerAuth(paystackSecretKey)
+
+        val body = mutableMapOf<String, Any>()
+        body["amount"] = 5000
+        body["email"] = customer.user.email
+
+        val entity = HttpEntity(body, httpHeaders)
+
+        val response = restTemplate.exchange(
+                "https://api.paystack.co/transaction/initialize",
+                HttpMethod.POST,
+                entity,
+                String::class.java
+        )
+
+        val mapper = ObjectMapper()
+        var root = mapper.readTree(response.body.toString())
+
+        if (root.path("status").toString() == "true") {
+            root = root.path("data")
+            val payment = Payment(
+                    5000.0,
+                    "card",
+                    root.get("reference").asText(),
+                    "pending"
+            )
+
+            paymentRepo.save(payment)
+            return serviceResponse(data = root.get("access_code").asText())
+        }
+
+        return serviceResponse(400, "an error occurred")
     }
 
     fun saveCard(paymentCardRequest: PaymentCardRequest): Response {
