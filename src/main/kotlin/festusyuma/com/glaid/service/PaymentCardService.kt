@@ -66,6 +66,7 @@ class PaymentCardService(
 
         val restTemplate = RestTemplate()
         val httpHeaders = HttpHeaders()
+        println(paystackSecretKey)
         httpHeaders.setBearerAuth(paystackSecretKey)
 
         val body = mutableMapOf<String, Any>()
