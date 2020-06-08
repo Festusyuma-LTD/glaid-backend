@@ -69,6 +69,7 @@ class PaymentCardService(
         val httpHeaders = HttpHeaders()
         httpHeaders.setBearerAuth(paystackSecretKey)
         httpHeaders.contentType = MediaType.APPLICATION_JSON
+        httpHeaders.accept = listOf(MediaType.APPLICATION_JSON)
 
         val body = mutableMapOf<String, Any>()
         body["amount"] = 5000
@@ -84,6 +85,7 @@ class PaymentCardService(
         )
 
         val mapper = ObjectMapper()
+        println(response)
         var root = mapper.readTree(response.body.toString())
 
         if (root.path("status").toString() == "true") {
