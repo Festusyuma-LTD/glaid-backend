@@ -16,6 +16,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 
@@ -66,16 +67,14 @@ class PaymentCardService(
 
         val restTemplate = RestTemplate()
         val httpHeaders = HttpHeaders()
-        println(paystackSecretKey)
         httpHeaders.setBearerAuth(paystackSecretKey)
+        httpHeaders.contentType = MediaType.APPLICATION_JSON
 
         val body = mutableMapOf<String, Any>()
         body["amount"] = 5000
         body["email"] = customer.user.email
 
         val entity = HttpEntity(body, httpHeaders)
-        println(entity.headers)
-        println(entity.body)
 
         val response = restTemplate.exchange(
                 "https://api.paystack.co/transaction/initialize",
