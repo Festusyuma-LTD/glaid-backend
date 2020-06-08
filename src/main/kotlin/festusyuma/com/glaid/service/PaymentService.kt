@@ -18,7 +18,7 @@ import java.time.temporal.TemporalAmount
 @Service
 class PaymentService {
 
-    @Value("\${paystack.secret}")
+    @Value("\${PAYSTACK_SECRET}")
     private lateinit var paystackSecretKey: String
 
     fun getReferenceDetails(reference: String): Response {
