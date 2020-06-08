@@ -14,6 +14,15 @@ class PaymentController(
         private val paymentCardService: PaymentCardService
 ) {
 
+    @GetMapping("card/save/init")
+    fun saveCardInit(): ResponseEntity<Response> {
+        val req = paymentCardService.saveCardInit()
+
+        return if (req.status == 200) {
+            response(data = req.data)
+        }else response(HttpStatus.BAD_REQUEST, req.message)
+    }
+
     @PostMapping("card/save")
     fun saveCard(@RequestBody paymentCardRequest: PaymentCardRequest): ResponseEntity<Response> {
         val req = paymentCardService.saveCard(paymentCardRequest)

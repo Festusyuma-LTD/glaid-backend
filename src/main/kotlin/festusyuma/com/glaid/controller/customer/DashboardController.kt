@@ -22,4 +22,11 @@ class DashboardController(
 
         return response(message = "Customer Welcome", data = customer)
     }
+
+    @GetMapping("validate_token")
+    fun validateToken(): ResponseEntity<Response> {
+        return if (customerService.getLoggedInCustomer() == null) {
+            response(HttpStatus.BAD_REQUEST, "an error occurred")
+        }else response()
+    }
 }
