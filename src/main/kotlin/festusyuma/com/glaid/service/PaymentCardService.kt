@@ -3,7 +3,6 @@ package festusyuma.com.glaid.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import festusyuma.com.glaid.dto.PaymentCardRequest
 import festusyuma.com.glaid.dto.PaystackTransaction
-import festusyuma.com.glaid.model.Customer
 import festusyuma.com.glaid.model.Payment
 import festusyuma.com.glaid.model.PaymentCard
 import festusyuma.com.glaid.repository.CustomerRepo
@@ -11,14 +10,18 @@ import festusyuma.com.glaid.repository.PaymentCardRepo
 import festusyuma.com.glaid.repository.PaymentRepo
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.serviceResponse
+import org.apache.http.conn.ssl.NoopHostnameVerifier
+import org.apache.http.impl.client.HttpClients
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+
 
 @Service
 class PaymentCardService(
@@ -65,11 +68,15 @@ class PaymentCardService(
         val customer = customerService.getLoggedInCustomer()
                 ?: return serviceResponse(400, "an unknown error occurred")
 
-        val restTemplate = RestTemplate()
+        val httpClient = HttpClients.custom()
+                .setSSLHostnameVerifier(NoopHostnameVerifier())
+                .build()
+        val requestFactory = HttpComponentsClientHttpRequestFactory()
+        requestFactory.httpClient = httpClient
+
+        val restTemplate = RestTemplate(requestFactory)
         val httpHeaders = HttpHeaders()
         httpHeaders.setBearerAuth(paystackSecretKey)
-        httpHeaders.contentType = MediaType.APPLICATION_JSON
-        httpHeaders.accept = listOf(MediaType.APPLICATION_JSON)
 
         val body = mutableMapOf<String, Any>()
         body["amount"] = 5000
@@ -85,7 +92,6 @@ class PaymentCardService(
         )
 
         val mapper = ObjectMapper()
-        println(response)
         var root = mapper.readTree(response.body.toString())
 
         if (root.path("status").toString() == "true") {
