@@ -28,7 +28,7 @@ class PaymentCardService(
         private val paymentRepo: PaymentRepo
 ) {
 
-    @Value("\${paystack.secret}")
+    @Value("\${PAYSTACK_SECRET}")
     private lateinit var paystackSecretKey: String
 
     fun getUserPaymentCards(): Response {
