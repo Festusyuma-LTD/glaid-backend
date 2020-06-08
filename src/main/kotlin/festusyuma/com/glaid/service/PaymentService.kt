@@ -6,6 +6,7 @@ import festusyuma.com.glaid.dto.PaystackTransaction
 import festusyuma.com.glaid.dto.PaystackTransactionAuthorization
 import festusyuma.com.glaid.model.User
 import festusyuma.com.glaid.util.Response
+import festusyuma.com.glaid.util.getRequestFactory
 import festusyuma.com.glaid.util.serviceResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -22,7 +23,7 @@ class PaymentService {
     private lateinit var paystackSecretKey: String
 
     fun getReferenceDetails(reference: String): Response {
-        val restTemplate = RestTemplate()
+        val restTemplate = RestTemplate(getRequestFactory())
         val httpHeaders = HttpHeaders()
         httpHeaders.setBearerAuth(paystackSecretKey)
 
@@ -105,7 +106,7 @@ class PaymentService {
     }
 
     fun chargeCard(auth: String, amount: Double, user: User): Response {
-        val restTemplate = RestTemplate()
+        val restTemplate = RestTemplate(getRequestFactory())
         val httpHeaders = HttpHeaders()
         httpHeaders.setBearerAuth(paystackSecretKey)
 
