@@ -9,16 +9,13 @@ import festusyuma.com.glaid.repository.CustomerRepo
 import festusyuma.com.glaid.repository.PaymentCardRepo
 import festusyuma.com.glaid.repository.PaymentRepo
 import festusyuma.com.glaid.util.Response
+import festusyuma.com.glaid.util.getRequestFactory
 import festusyuma.com.glaid.util.serviceResponse
-import org.apache.http.conn.ssl.NoopHostnameVerifier
-import org.apache.http.impl.client.HttpClients
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 
@@ -68,13 +65,7 @@ class PaymentCardService(
         val customer = customerService.getLoggedInCustomer()
                 ?: return serviceResponse(400, "an unknown error occurred")
 
-        val httpClient = HttpClients.custom()
-                .setSSLHostnameVerifier(NoopHostnameVerifier())
-                .build()
-        val requestFactory = HttpComponentsClientHttpRequestFactory()
-        requestFactory.httpClient = httpClient
-
-        val restTemplate = RestTemplate(requestFactory)
+        val restTemplate = RestTemplate(getRequestFactory())
         val httpHeaders = HttpHeaders()
         httpHeaders.setBearerAuth(paystackSecretKey)
 
