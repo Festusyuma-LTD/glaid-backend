@@ -109,7 +109,7 @@ class PaymentCardService(
         if (isReusable && paystackTransactionReq.status == 200) {
             val paystackTransaction = paystackTransactionReq.data as PaystackTransaction
             val paymentCard = PaymentCard(
-                    paystackTransaction.authorization.last4,
+                    paymentCardRequest.cardNo,
                     paystackTransaction.authorization.expMonth,
                     paystackTransaction.authorization.expYear,
                     paystackTransaction.authorization.authorizationCode
