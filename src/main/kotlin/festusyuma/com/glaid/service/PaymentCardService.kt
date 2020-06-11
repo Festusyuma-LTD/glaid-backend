@@ -34,7 +34,7 @@ class PaymentCardService(
 
     fun getUserPaymentCards(): Response {
         val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
-        return serviceResponse(data = customer.paymentCards)
+        return serviceResponse(data = customer.paymentCards.reversed())
     }
 
     fun getUserPaymentCard(cardId: Long): Response {
