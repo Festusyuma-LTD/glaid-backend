@@ -11,6 +11,9 @@ data class Customer (
         @OneToOne
         val wallet: Wallet,
 
+        @OneToOne
+        val preferredPaymentMethod: PreferredPaymentMethod,
+
         @OneToMany
         @OrderBy("id DESC")
         var address: MutableList<Address> = mutableListOf(),
