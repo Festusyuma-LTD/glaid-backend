@@ -2,9 +2,11 @@ package festusyuma.com.glaid.service
 
 import festusyuma.com.glaid.dto.UserRequest
 import festusyuma.com.glaid.model.Customer
+import festusyuma.com.glaid.model.PreferredPaymentMethod
 import festusyuma.com.glaid.model.User
 import festusyuma.com.glaid.model.Wallet
 import festusyuma.com.glaid.repository.CustomerRepo
+import festusyuma.com.glaid.repository.PreferredPaymentRepo
 import festusyuma.com.glaid.repository.RoleRepo
 import festusyuma.com.glaid.repository.WalletRepo
 import festusyuma.com.glaid.util.Response
@@ -17,6 +19,7 @@ class CustomerAccountService(
         private val roleRepo: RoleRepo,
         private val walletRepo: WalletRepo,
         private val customerRepo: CustomerRepo,
+        private val preferredPaymentRepo: PreferredPaymentRepo,
         private val userService: UserService
 ) {
     private val errorMessage: String = "An unknown error occurred"
@@ -38,7 +41,8 @@ class CustomerAccountService(
             if (req.message != "verification") {
                 user = req.data as User
                 val wallet = walletRepo.save(Wallet())
-                val customer = Customer(user, wallet)
+                val preferredPayment = preferredPaymentRepo.save(PreferredPaymentMethod("wallet"))
+                val customer = Customer(user, wallet, preferredPayment)
                 customerRepo.save(customer)
 
                 serviceResponse(message = "User registration successful")

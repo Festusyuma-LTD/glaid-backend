@@ -1,7 +1,10 @@
 package festusyuma.com.glaid.controller.customer
 
 import festusyuma.com.glaid.dto.PaymentCardRequest
+import festusyuma.com.glaid.dto.PreferredPaymentRequest
+import festusyuma.com.glaid.model.PreferredPaymentMethod
 import festusyuma.com.glaid.service.PaymentCardService
+import festusyuma.com.glaid.service.PaymentService
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
 import org.springframework.http.HttpStatus
@@ -11,8 +14,18 @@ import org.springframework.web.bind.annotation.*
 @RestController("customer/payment")
 @RequestMapping("customer/payment")
 class PaymentController(
+        private val paymentService: PaymentService,
         private val paymentCardService: PaymentCardService
 ) {
+
+    @PostMapping("set_preferred")
+    fun setPreferredPayment(@RequestBody preferredPaymentRequest: PreferredPaymentMethod): ResponseEntity<Response> {
+        val req = paymentService.setPreferredPayment(preferredPaymentRequest)
+
+        return if (req.status == 200) {
+            response(data = req.data)
+        }else response(HttpStatus.BAD_REQUEST, req.message)
+    }
 
     @GetMapping("card/save/init")
     fun saveCardInit(): ResponseEntity<Response> {
