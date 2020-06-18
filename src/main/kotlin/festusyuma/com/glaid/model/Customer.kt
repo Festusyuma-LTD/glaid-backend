@@ -12,7 +12,7 @@ data class Customer (
         val wallet: Wallet,
 
         @OneToOne
-        val preferredPaymentMethod: PreferredPaymentMethod,
+        var preferredPaymentMethod: PreferredPaymentMethod? = null,
 
         @OneToMany
         @OrderBy("id DESC")
