@@ -75,6 +75,8 @@ class PaymentService(
                         }else return serviceResponse(400, "Invalid card id")
                     }else return serviceResponse(400, "an unknown error occurred")
                 }else preferredPaymentMethod.cardId = null
+
+                preferredPaymentRepo.save(preferredPaymentMethod)
             }else return serviceResponse(400, "an unknown error occurred")
         }
 
