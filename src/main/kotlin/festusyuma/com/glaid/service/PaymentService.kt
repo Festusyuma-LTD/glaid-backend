@@ -8,11 +8,13 @@ import festusyuma.com.glaid.dto.PreferredPaymentRequest
 import festusyuma.com.glaid.model.PreferredPaymentMethod
 import festusyuma.com.glaid.model.User
 import festusyuma.com.glaid.repository.CustomerRepo
+import festusyuma.com.glaid.repository.PaymentCardRepo
 import festusyuma.com.glaid.repository.PreferredPaymentRepo
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.getRequestFactory
 import festusyuma.com.glaid.util.serviceResponse
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -24,7 +26,8 @@ import java.time.temporal.TemporalAmount
 class PaymentService(
         private val customerService: CustomerService,
         private val preferredPaymentRepo: PreferredPaymentRepo,
-        private val customerRepo: CustomerRepo
+        private val customerRepo: CustomerRepo,
+        private val cardRepo: PaymentCardRepo
 ) {
 
     @Value("\${PAYSTACK_SECRET}")
@@ -51,7 +54,6 @@ class PaymentService(
             return serviceResponse(400, "an unknown error occurred")
 
         if (preferredPaymentRequest.type !in listOf("wallet", "cash", "card")) return serviceResponse(400, "an unknown error occurred")
-        if (preferredPaymentRequest.type == "card" && preferredPaymentRequest.cardId == null) return serviceResponse(400, "an unknown error occurred")
 
         if (customer.preferredPaymentMethod == null) {
             var preferredPaymentMethod = PreferredPaymentMethod(preferredPaymentRequest.type, preferredPaymentRequest.cardId)
@@ -64,7 +66,14 @@ class PaymentService(
             if (preferredPaymentMethod != null) {
                 preferredPaymentMethod.type = preferredPaymentRequest.type
                 if (preferredPaymentMethod.type == "card") {
-                    preferredPaymentMethod.cardId = preferredPaymentRequest.cardId
+                    if (preferredPaymentRequest.cardId != null) {
+                        val paymentCard = cardRepo.findByIdOrNull(preferredPaymentRequest.cardId!!)
+                                ?: return serviceResponse(400, "Invalid card id")
+
+                        if (paymentCard in customer.paymentCards){
+                            preferredPaymentMethod.cardId = preferredPaymentRequest.cardId
+                        }else return serviceResponse(400, "Invalid card id")
+                    }else return serviceResponse(400, "an unknown error occurred")
                 }else preferredPaymentMethod.cardId = null
             }else return serviceResponse(400, "an unknown error occurred")
         }
