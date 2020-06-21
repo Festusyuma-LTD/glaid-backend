@@ -8,6 +8,7 @@ import festusyuma.com.glaid.model.PaymentCard
 import festusyuma.com.glaid.repository.CustomerRepo
 import festusyuma.com.glaid.repository.PaymentCardRepo
 import festusyuma.com.glaid.repository.PaymentRepo
+import festusyuma.com.glaid.repository.PreferredPaymentRepo
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.getRequestFactory
 import festusyuma.com.glaid.util.serviceResponse
@@ -26,7 +27,8 @@ class PaymentCardService(
         private val customerService: CustomerService,
         private val paymentCardRepo: PaymentCardRepo,
         private val customerRepo: CustomerRepo,
-        private val paymentRepo: PaymentRepo
+        private val paymentRepo: PaymentRepo,
+        private val preferredPaymentRepo: PreferredPaymentRepo
 ) {
 
     @Value("\${PAYSTACK_SECRET}")
@@ -53,6 +55,14 @@ class PaymentCardService(
         return if (card in customer.paymentCards) {
             customer.paymentCards.remove(card)
             customerRepo.save(customer)
+
+            val preferredPayment = customer.preferredPaymentMethod
+            if (preferredPayment != null) {
+                if (card.id == preferredPayment.cardId) {
+                    preferredPayment.type = "wallet"
+                    preferredPayment.cardId = null
+                }
+            }
 
             card.authorizationCode = ""
             paymentCardRepo.save(card)
