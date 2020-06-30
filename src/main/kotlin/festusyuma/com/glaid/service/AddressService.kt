@@ -34,15 +34,19 @@ class AddressService(
     }
 
     fun saveAddress(addressRequest: AddressRequest): Address? {
-
-        val address = if (addressRequest.id != null) {
-            addressRepo.findByIdOrNull(addressRequest.id)?: return null
-        }else Address()
-
-        address.address = addressRequest.address
-        address.type = if (addressRequest.type in addressTypes) {
+        val customer = customerService.getLoggedInCustomer()?: return null
+        val addressType = if (addressRequest.type in addressTypes) {
             addressRequest.type
         }else addressTypes[0]
+
+        val address = if (addressRequest.id != null) {
+            customer.address.find { address -> address.id == addressRequest.id } ?: return null
+        }else {
+            customer.address.find { address -> address.type == addressType } ?: Address()
+        }
+
+        address.address = addressRequest.address
+        address.type = addressType
 
         val location: Location = address.location?: Location()
         location.lng = addressRequest.lng
