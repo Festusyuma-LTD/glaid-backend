@@ -33,3 +33,4 @@ build/
 ### local application properties ###
 **/main/resources/application.properties
 **/main/resources/application-local.properties
+**/main/resources/application-local-heroku.properties
