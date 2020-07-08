@@ -25,10 +25,10 @@ class AddressService(
 
     fun saveCustomerAddress(addressRequest: AddressRequest): Response {
         val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
-        saveAddress(addressRequest)?: return serviceResponse(400, "invalid address id")
+        val address = saveAddress(addressRequest)?: return serviceResponse(400, "invalid address id")
         customerRepo.save(customer)
 
-        return serviceResponse(message = "Address saved")
+        return serviceResponse(message = "Address saved", data = address)
     }
 
     fun saveAddress(addressRequest: AddressRequest): Address? {
