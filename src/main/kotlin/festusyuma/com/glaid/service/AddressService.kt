@@ -25,9 +25,7 @@ class AddressService(
 
     fun saveCustomerAddress(addressRequest: AddressRequest): Response {
         val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
-        val address = saveAddress(addressRequest)?: return serviceResponse(400, "invalid address id")
-
-        customer.address.add(address)
+        saveAddress(addressRequest)?: return serviceResponse(400, "invalid address id")
         customerRepo.save(customer)
 
         return serviceResponse(message = "Address saved")
@@ -39,7 +37,7 @@ class AddressService(
             addressRequest.type
         }else addressTypes[0]
 
-        val address = if (addressRequest.id != null) {
+        var address = if (addressRequest.id != null) {
             customer.address.find { address -> address.id == addressRequest.id } ?: return null
         }else {
             customer.address.find { address -> address.type == addressType } ?: Address()
@@ -52,9 +50,16 @@ class AddressService(
         location.lng = addressRequest.lng
         location.lat = addressRequest.lat
         locationRepo.save(location)
-
         address.location = location
-        return addressRepo.save(address)
+
+        if (address.id == null) {
+            address = addressRepo.save(address)
+            customer.address.add(address)
+        }else {
+            address = addressRepo.save(address)
+        }
+
+        return address
     }
 
     fun listAddress(): Response {
