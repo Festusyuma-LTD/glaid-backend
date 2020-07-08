@@ -21,7 +21,7 @@ class AddressService(
         private val customerRepo: CustomerRepo
 ) {
 
-    private val addressTypes = listOf("work", "business")
+    private val addressTypes = listOf("home", "business")
 
     fun saveCustomerAddress(addressRequest: AddressRequest): Response {
         val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, "an unknown error occurred")
