@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -13,6 +14,7 @@ data class Orders(
         var truck: GasTruck? = null,
 
         @ManyToOne
+        @JsonIgnore
         val customer: Customer,
 
         @OneToOne
