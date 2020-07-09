@@ -30,7 +30,7 @@ class SecurityConfiguration (
                         "/login",
                         "/customer/register",
                         "/driver/register",
-                        "reset_password",
+                        "/reset_password",
                         "/validate_otp"
                 )?.permitAll()
                 ?.antMatchers("/admin/**")?.hasRole("ADMIN")

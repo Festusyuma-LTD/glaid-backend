@@ -5,6 +5,6 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @Entity
-data class DeliveryStatus (
+data class OrderStatus (
         var status: String = ""
 ): Common()

@@ -12,9 +12,9 @@ class CustomerService(
         private val customerRepo: CustomerRepo
 ) {
 
-    fun getLoggedInCustomer(): Response {
-        val user = userService.getLoggedInUser()?: return serviceResponse(400, "Invalid token")
-        return serviceResponse(data = customerRepo.findByUser(user))
+    fun getLoggedInCustomer(): Customer? {
+        val user = userService.getLoggedInUser()?: return null
+        return customerRepo.findByUser(user)
     }
 
     fun search(query: String): Response {
