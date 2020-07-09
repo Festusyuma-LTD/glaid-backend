@@ -19,7 +19,7 @@ class AddressController(
         val req = service.saveCustomerAddress(addressRequest)
 
         return if(req.status == 200) {
-            response(message = req.message)
+            response(message = req.message, data = req.data)
         }else response(HttpStatus.BAD_REQUEST, message = req.message)
     }
 
