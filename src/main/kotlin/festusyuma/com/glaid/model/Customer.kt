@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.model
 
+import com.fasterxml.jackson.annotation.JsonBackReference
 import javax.persistence.*
 
 @Entity
@@ -24,5 +25,6 @@ data class Customer (
 
         @OneToMany
         @OrderBy("id DESC")
+        @JsonBackReference
         var orders: MutableList<Orders> = mutableListOf()
 ): Common()
