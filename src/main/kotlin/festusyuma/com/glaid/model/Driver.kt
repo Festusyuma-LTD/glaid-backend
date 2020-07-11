@@ -1,6 +1,6 @@
 package festusyuma.com.glaid.model
 
-import com.fasterxml.jackson.annotation.JsonBackReference
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import javax.persistence.*
 
 @Entity
@@ -15,6 +15,6 @@ data class Driver (
         var approved: Boolean = false,
 
         @OneToMany
-        @JsonBackReference
+        @JsonIgnoreProperties("driver")
         var orders: List<Orders> = listOf()
 ): Common()
