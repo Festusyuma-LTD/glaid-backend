@@ -13,6 +13,11 @@ class DriverService(
         private val driverRepo: DriverRepo
 ) {
 
+    fun getLoggedInDriver(): Driver? {
+        val user = userService.getLoggedInUser()?: return null
+        return driverRepo.findByUser(user)
+    }
+
     fun search(query: String): Response {
         val users = userService.searchUser(query)
         return serviceResponse(data = driverRepo.findByUserIn(users))
