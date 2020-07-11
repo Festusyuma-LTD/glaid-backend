@@ -1,6 +1,7 @@
 package festusyuma.com.glaid.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonManagedReference
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -8,13 +9,14 @@ import javax.persistence.*
 data class Orders(
 
         @ManyToOne
+        @JsonManagedReference
         var driver: Driver? = null,
 
         @ManyToOne
         var truck: GasTruck? = null,
 
         @ManyToOne
-        @JsonIgnore
+        @JsonManagedReference
         val customer: Customer,
 
         @OneToOne
