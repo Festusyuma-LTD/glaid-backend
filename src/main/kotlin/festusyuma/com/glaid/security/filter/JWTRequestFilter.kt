@@ -27,7 +27,6 @@ class JWTRequestFilter(
     override fun doFilterInternal(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain) {
 
         if (FirebaseApp.getApps().size == 0) {
-            val serviceAccount = FileInputStream("C:/Users/festu/Documents/Work/glaid project/backend/glaid/src/main/resources/glaid-tracking-firebase-adminsdk.json")
             val options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.getApplicationDefault())
                     .setDatabaseUrl("https://glaid-tracking.firebaseio.com/")
