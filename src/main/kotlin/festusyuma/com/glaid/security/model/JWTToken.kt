@@ -5,6 +5,7 @@ import festusyuma.com.glaid.model.User
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import javax.persistence.Entity
+import javax.persistence.Lob
 import javax.persistence.ManyToOne
 
 @Entity
@@ -12,6 +13,8 @@ data class JWTToken (
 
         @ManyToOne
         val user: User? = null,
+
+        @Lob
         val token: String,
         var expired: Boolean = true
 
@@ -22,5 +25,6 @@ data class JWTToken (
 @Repository
 interface JWTTokenRepo: CrudRepository<JWTToken, Long> {
     fun findByToken(token: String): JWTToken?
+    fun findByTokenAndExpired(token: String, expired: Boolean = false): JWTToken?
     fun findByUserAndExpired(user: User, expired: Boolean = false): JWTToken?
 }

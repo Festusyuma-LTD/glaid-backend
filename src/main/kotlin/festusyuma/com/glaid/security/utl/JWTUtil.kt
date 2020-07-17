@@ -1,5 +1,7 @@
 package festusyuma.com.glaid.security.utl
 
+import com.google.firebase.auth.FirebaseAuth
+import festusyuma.com.glaid.model.Common
 import festusyuma.com.glaid.repository.CustomerRepo
 import festusyuma.com.glaid.repository.DriverRepo
 import festusyuma.com.glaid.security.UserDetails
@@ -18,44 +20,36 @@ class JWTUtil (
         val customerRepo: CustomerRepo,
         val driverRepo: DriverRepo
 ) {
-
-    private val secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256)
-    var body: Claims? = null
+    var body: MutableMap<String, Any>? = null
 
     fun getUsername(): String? {
-        return body?.subject
-    }
-
-    fun getExpiration(): Date? {
-        return body?.expiration
-    }
-
-    fun isExpired(): Boolean {
-        return getExpiration()?.before(Date()) ?: true
+        return body?.get("email") as String
     }
 
     private fun setClaims(token: JWTToken) {
         try {
-            body = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token.token)
-                    .body
+            val decodedToken = FirebaseAuth.getInstance().verifyIdToken(token.token)
 
+            val claims: MutableMap<String, Any> = decodedToken.claims
+            claims["email"] = decodedToken.uid
+
+            body = claims
         } catch (e: Exception) {
+            e.printStackTrace()
             token.expired = true
             jwtTokenRepo.save(token)
         }
     }
 
     fun generateToken(userDetails: UserDetails): String {
-        val claims = Jwts.claims()
-        claims["user"] = when(userDetails.user.role?.role) {
-            "ADMIN" -> userDetails.user
-            "DRIVER" -> driverRepo.findByUser(userDetails.user)
-            "CUSTOMER" -> customerRepo.findByUser(userDetails.user)
-            else -> null
-        }
+        val gClaims: MutableMap<String, Any> = mutableMapOf(
+                "user" to when(userDetails.user.role?.role) {
+                    "ADMIN" -> userDetails.user
+                    "DRIVER" -> driverRepo.findByUser(userDetails.user)
+                    "CUSTOMER" -> customerRepo.findByUser(userDetails.user)
+                    else -> ""
+                }
+        )
 
         val oldToken: JWTToken? = jwtTokenRepo.findByUserAndExpired(userDetails.user)
         if (oldToken != null) {
@@ -63,32 +57,25 @@ class JWTUtil (
             jwtTokenRepo.save(oldToken)
         }
 
-        val token = JWTToken(userDetails.user, createToken(userDetails.username, claims), false)
+        val token = JWTToken(userDetails.user, createToken(userDetails.username, gClaims), false)
         jwtTokenRepo.save(token)
 
         return token.token
     }
 
-    private fun createToken(email: String, claims: Claims): String {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(email)
-                .setIssuedAt(Date(System.currentTimeMillis()))
-                .setExpiration(Date(System.currentTimeMillis() + (1000 * 24 * 60 * 60)))
-                .signWith(secretKey).compact()
+    private fun createToken(email: String, claims: MutableMap<String, Any>): String {
+        return FirebaseAuth
+                .getInstance()
+                .createCustomToken(email, claims)
     }
 
     fun validateToken(token: JWTToken, email: String): Boolean {
         setClaims(token)
 
         if (body != null) {
-            if (!isExpired()) {
-                if (getUsername().equals(email)) {
-                    return true
-                }
-            }else {
-                token.expired = true
-                jwtTokenRepo.save(token)
+            println("id, ${getUsername()}")
+            if (getUsername().equals(email)) {
+                return true
             }
         }
 
