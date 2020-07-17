@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import festusyuma.com.glaid.model.Common
 import festusyuma.com.glaid.repository.CustomerRepo
 import festusyuma.com.glaid.repository.DriverRepo
+import festusyuma.com.glaid.repository.UserRepo
 import festusyuma.com.glaid.security.UserDetails
 import festusyuma.com.glaid.security.model.JWTToken
 import festusyuma.com.glaid.security.model.JWTTokenRepo
@@ -18,9 +19,12 @@ import java.util.*
 class JWTUtil (
         val jwtTokenRepo: JWTTokenRepo,
         val customerRepo: CustomerRepo,
-        val driverRepo: DriverRepo
+        val driverRepo: DriverRepo,
+        val userRepo: UserRepo
 ) {
+
     var body: MutableMap<String, Any>? = null
+    var userDetails: UserDetails? = null
 
     fun getUsername(): String? {
         return body?.get("email") as String
@@ -29,7 +33,6 @@ class JWTUtil (
     private fun setClaims(token: JWTToken) {
         try {
             val decodedToken = FirebaseAuth.getInstance().verifyIdToken(token.token)
-
             val claims: MutableMap<String, Any> = decodedToken.claims
             claims["email"] = decodedToken.uid
 
@@ -69,16 +72,24 @@ class JWTUtil (
                 .createCustomToken(email, claims)
     }
 
-    fun validateToken(token: JWTToken, email: String): Boolean {
-        setClaims(token)
+    fun validateToken(clientToken: String): Boolean {
+        setUserDetails(clientToken)
 
-        if (body != null) {
-            println("id, ${getUsername()}")
-            if (getUsername().equals(email)) {
-                return true
+        return if (userDetails != null) {
+            true
+        }else return false
+    }
+
+    fun setUserDetails(clientToken: String){
+        try {
+            val decodedToken = FirebaseAuth.getInstance().verifyIdToken(clientToken)
+            val user = userRepo.findByEmail(decodedToken.uid)
+
+            if (user != null) {
+                userDetails = UserDetails(user)
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-        return false
     }
 }

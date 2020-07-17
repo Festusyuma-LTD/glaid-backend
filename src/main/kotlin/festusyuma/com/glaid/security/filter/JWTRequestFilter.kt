@@ -27,6 +27,7 @@ class JWTRequestFilter(
     override fun doFilterInternal(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain) {
 
         if (FirebaseApp.getApps().size == 0) {
+            /*val serviceAccount = FileInputStream("C:/Users/festu/Documents/Work/glaid project/backend/glaid/src/main/resources/glaid-tracking-firebase-adminsdk.json")*/
             val options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.getApplicationDefault())
                     .setDatabaseUrl("https://glaid-tracking.firebaseio.com/")
@@ -38,21 +39,18 @@ class JWTRequestFilter(
 
         val authorization: String? = req.getHeader("Authorization")
         if (authorization?.startsWith("Bearer ") == true) {
-            val token = jwtTokenRepo.findByTokenAndExpired(authorization.substring(7))
+            val clientToken = authorization.substring(7)
 
-            if (token != null) {
-                val user = token.user
+            if (jwtUtil.validateToken(clientToken)) {
+                val userDetails = jwtUtil.userDetails
 
-                if (user != null) {
-                    if (jwtUtil.validateToken(token, user.email)) {
-                        val userDetails = UserDetails(user)
-                        val userAuthentication = UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.authorities
-                        )
+                if (userDetails != null) {
+                    val userAuthentication = UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.authorities
+                    )
 
-                        userAuthentication.details = WebAuthenticationDetailsSource().buildDetails(req)
-                        SecurityContextHolder.getContext().authentication = userAuthentication
-                    }
+                    userAuthentication.details = WebAuthenticationDetailsSource().buildDetails(req)
+                    SecurityContextHolder.getContext().authentication = userAuthentication
                 }
             }
         }
