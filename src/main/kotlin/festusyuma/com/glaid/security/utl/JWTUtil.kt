@@ -89,7 +89,7 @@ class JWTUtil (
                 userDetails = UserDetails(user)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            /*e.printStackTrace()*/
         }
     }
 }
