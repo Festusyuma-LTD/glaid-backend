@@ -1,6 +1,7 @@
 package festusyuma.com.glaid.service
 
 import festusyuma.com.glaid.model.User
+import festusyuma.com.glaid.model.fs.FSUser
 import festusyuma.com.glaid.repository.UserOTPRepo
 import festusyuma.com.glaid.repository.UserRepo
 import festusyuma.com.glaid.util.*
@@ -34,10 +35,17 @@ class UserService(
 
         user.password = passwordEncoder.encode(user.password)
         val newUser = userRepo.save(user)
+        createFSUser(newUser)
 
         return if (newUser.id != null) {
             serviceResponse(data = newUser)
         }else serviceResponse(400, errorMessage)
+    }
+
+    private fun createFSUser(user: User) {
+        val userRef = db.collection(USERS).document(user.id.toString())
+        val fsUSer = FSUser(user.fullName, user.email, user.tel)
+        userRef.set(fsUSer)
     }
 
     fun updateUser(user: User): Response {
