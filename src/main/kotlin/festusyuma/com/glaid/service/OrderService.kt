@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.service
 
+import com.google.firebase.cloud.FirestoreClient
 import festusyuma.com.glaid.dto.AddressRequest
 import festusyuma.com.glaid.dto.OrderRequest
 import festusyuma.com.glaid.dto.PaystackTransaction
@@ -9,6 +10,7 @@ import festusyuma.com.glaid.model.Payment
 import festusyuma.com.glaid.model.PaymentCard
 import festusyuma.com.glaid.repository.*
 import festusyuma.com.glaid.util.Response
+import festusyuma.com.glaid.util.USER_LOCATIONS
 import festusyuma.com.glaid.util.serviceResponse
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -66,6 +68,9 @@ class OrderService(
                     orderRepo.save(order)
                     customer.orders.add(order)
                     customerRepo.save(customer)
+
+                    val db = FirestoreClient.getFirestore().collection(USER_LOCATIONS)
+
                     serviceResponse(message = "order placed", data = order)
                 }else serviceResponse(400, order.payment?.status?: "an unknown error occurred")
             }
