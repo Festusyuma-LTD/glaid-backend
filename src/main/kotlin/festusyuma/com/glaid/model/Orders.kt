@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.model
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -7,12 +8,14 @@ import javax.persistence.*
 data class Orders(
 
         @ManyToOne
+        @JsonIgnoreProperties("orders")
         var driver: Driver? = null,
 
         @ManyToOne
         var truck: GasTruck? = null,
 
         @ManyToOne
+        @JsonIgnoreProperties("orders")
         val customer: Customer,
 
         @OneToOne

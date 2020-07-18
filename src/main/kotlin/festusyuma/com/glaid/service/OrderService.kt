@@ -23,7 +23,8 @@ class OrderService(
         private val orderRepo: OrderRepo,
         private val orderStatusRepo: OrderStatusRepo,
         private val paymentRepo: PaymentRepo,
-        private val walletRepo: WalletRepo
+        private val walletRepo: WalletRepo,
+        private val customerRepo: CustomerRepo
 ) {
 
     fun createOrder(orderRequest: OrderRequest): Response {
@@ -63,6 +64,8 @@ class OrderService(
                 return if (order.payment?.status == "success" || order.payment?.type == "on_delivery") {
                     paymentRepo.save(order.payment!!)
                     orderRepo.save(order)
+                    customer.orders.add(order)
+                    customerRepo.save(customer)
                     serviceResponse(message = "order placed", data = order)
                 }else serviceResponse(400, order.payment?.status?: "an unknown error occurred")
             }
