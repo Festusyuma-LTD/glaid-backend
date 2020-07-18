@@ -1,13 +1,17 @@
 package festusyuma.com.glaid.security.utl
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.cloud.FirestoreClient
 import festusyuma.com.glaid.model.Common
+import festusyuma.com.glaid.model.User
+import festusyuma.com.glaid.model.fs.FSUser
 import festusyuma.com.glaid.repository.CustomerRepo
 import festusyuma.com.glaid.repository.DriverRepo
 import festusyuma.com.glaid.repository.UserRepo
 import festusyuma.com.glaid.security.UserDetails
 import festusyuma.com.glaid.security.model.JWTToken
 import festusyuma.com.glaid.security.model.JWTTokenRepo
+import festusyuma.com.glaid.util.USERS
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -60,16 +64,23 @@ class JWTUtil (
             jwtTokenRepo.save(oldToken)
         }
 
-        val token = JWTToken(userDetails.user, createToken(userDetails.username, gClaims), false)
+        val token = JWTToken(userDetails.user, createToken(userDetails.user, gClaims), false)
         jwtTokenRepo.save(token)
 
         return token.token
     }
 
-    private fun createToken(email: String, claims: MutableMap<String, Any>): String {
-        return FirebaseAuth
-                .getInstance()
-                .createCustomToken(email, claims)
+    private fun createToken(user: User, claims: MutableMap<String, Any>): String {
+        val uid = user.id.toString()
+        val token = FirebaseAuth.getInstance().createCustomToken(uid, claims)
+
+        //For testing purposes todo to be removed
+        val db = FirestoreClient.getFirestore().collection(USERS).document(uid)
+        val fsUser = FSUser(user.fullName, user.email, user.tel)
+        db.set(fsUser)
+        //end
+
+        return token
     }
 
     fun validateToken(clientToken: String): Boolean {
@@ -89,7 +100,7 @@ class JWTUtil (
                 userDetails = UserDetails(user)
             }
         } catch (e: Exception) {
-            /*e.printStackTrace()*/
+            println("Verify token error: ${e.message}")
         }
     }
 }

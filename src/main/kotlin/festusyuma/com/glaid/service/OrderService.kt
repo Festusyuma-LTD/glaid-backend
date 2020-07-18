@@ -1,15 +1,14 @@
 package festusyuma.com.glaid.service
 
+import com.google.firebase.cloud.FirestoreClient
 import festusyuma.com.glaid.dto.AddressRequest
 import festusyuma.com.glaid.dto.OrderRequest
 import festusyuma.com.glaid.dto.PaystackTransaction
-import festusyuma.com.glaid.model.Address
-import festusyuma.com.glaid.model.Orders
-import festusyuma.com.glaid.model.Payment
-import festusyuma.com.glaid.model.PaymentCard
+import festusyuma.com.glaid.model.*
+import festusyuma.com.glaid.model.fs.FSPendingOrder
+import festusyuma.com.glaid.model.fs.FSUser
 import festusyuma.com.glaid.repository.*
-import festusyuma.com.glaid.util.Response
-import festusyuma.com.glaid.util.serviceResponse
+import festusyuma.com.glaid.util.*
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
@@ -66,12 +65,32 @@ class OrderService(
                     orderRepo.save(order)
                     customer.orders.add(order)
                     customerRepo.save(customer)
+
+                    saveFSPendingOrder(order, customer.user)
                     serviceResponse(message = "order placed", data = order)
                 }else serviceResponse(400, order.payment?.status?: "an unknown error occurred")
             }
         }
 
         return serviceResponse(400, "an unknown error occurred")
+    }
+
+    private fun saveFSPendingOrder(order: Orders, user: User) {
+        val userRef = db.collection(USERS).document(user.id.toString()).get().get()
+        val fsUser = userRef.toObject(FSUser::class.java)
+
+        if (fsUser != null) {
+            val pendingOrdersRef = db.collection(PENDING_ORDERS).document(order.id.toString())
+            val fsPendingOrders = FSPendingOrder(
+                    fsUser,
+                    order.quantity,
+                    order.gasType.type,
+                    order.gasType.unit,
+                    order.payment?.amount?: 0.0
+            )
+
+            pendingOrdersRef.set(fsPendingOrders)
+        }
     }
 
     fun getDeliveryPrice(): Double {
