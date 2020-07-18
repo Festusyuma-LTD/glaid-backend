@@ -73,9 +73,12 @@ class JWTUtil (
     private fun createToken(user: User, claims: MutableMap<String, Any>): String {
         val uid = user.id.toString()
         val token = FirebaseAuth.getInstance().createCustomToken(uid, claims)
+
+        //For testing purposes todo to be removed
         val db = FirestoreClient.getFirestore().collection(USERS).document(uid)
         val fsUser = FSUser(user.fullName, user.email, user.tel)
         db.set(fsUser)
+        //end
 
         return token
     }
