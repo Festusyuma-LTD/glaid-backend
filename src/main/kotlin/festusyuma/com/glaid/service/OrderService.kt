@@ -45,7 +45,7 @@ class OrderService(
                 return serviceResponse(400, "Business orders have to be a minimum of 5000 liters")
             }
 
-            val order = Orders(
+            var order = Orders(
                     customer = customer,
                     gasType = gasType,
                     deliveryAddress = deliveryAddress,
@@ -62,7 +62,7 @@ class OrderService(
             if (order.payment != null) {
                 return if (order.payment?.status == "success" || order.payment?.type == "on_delivery") {
                     paymentRepo.save(order.payment!!)
-                    orderRepo.save(order)
+                    order = orderRepo.save(order)
                     customer.orders.add(order)
                     customerRepo.save(customer)
 
