@@ -31,7 +31,7 @@ data class Orders(
         var amount: Double,
         var deliveryPrice: Double,
         var tax: Double,
-        var scheduledDate: LocalDateTime = LocalDateTime.now(),
+        var scheduledDate: LocalDateTime? = LocalDateTime.now(),
 
         @ManyToOne
         var status: OrderStatus

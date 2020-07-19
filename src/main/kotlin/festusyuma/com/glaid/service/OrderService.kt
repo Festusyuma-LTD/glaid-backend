@@ -41,9 +41,11 @@ class OrderService(
             val deliveryAddress = getDeliveryAddress(orderRequest.deliveryAddress)
                     ?: return serviceResponse(400, "invalid delivery address")
 
-            if (deliveryAddress.type == "business" && orderRequest.quantity < getMinimumBusinessDelivery()) {
+            if (deliveryAddress.type == AddressType.BUSINESS && orderRequest.quantity < getMinimumBusinessDelivery()) {
                 return serviceResponse(400, "Business orders have to be a minimum of 5000 liters")
             }
+
+            val scheduledData = if (deliveryAddress.type == AddressType.HOME) null else orderRequest.scheduledDate
 
             var order = Orders(
                     customer = customer,
@@ -53,7 +55,7 @@ class OrderService(
                     amount = total,
                     deliveryPrice = delivery,
                     tax = tax,
-                    scheduledDate = orderRequest.scheduledDate,
+                    scheduledDate = scheduledData,
                     status = orderStatusRepo.findByIdOrNull(1)?: return serviceResponse(400, "an unknown error occurred")
             )
 

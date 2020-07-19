@@ -15,7 +15,7 @@ class PaymentType {
         const val CASH = "on_delivery"
 
         fun all(): List<String> {
-            return listOf(PaymentType.CARD, PaymentType.WALLET, PaymentType.CASH)
+            return listOf(CARD, WALLET, CASH)
         }
     }
 }
@@ -26,7 +26,7 @@ class AddressType {
         const val BUSINESS = "business"
 
         fun all(): List<String> {
-            return listOf(AddressType.HOME, AddressType.BUSINESS)
+            return listOf(HOME, BUSINESS)
         }
     }
 }
