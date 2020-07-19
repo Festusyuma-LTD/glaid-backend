@@ -4,16 +4,14 @@ import com.google.cloud.firestore.annotation.ServerTimestamp
 import java.security.Timestamp
 
 data class FSPendingOrder (
-        val user: FSUser,
-        val quantity: Double,
-        val gasType: String,
-        val gasTypeUnit: String,
-        val amount: Double,
+        val user: FSUser?= null,
+        val quantity: Double?= null,
+        val gasType: String?= null,
+        val gasTypeUnit: String?= null,
+        val amount: Double?= null,
         val driverId: String? = null,
         val driver: FSUser? = null,
 
         @ServerTimestamp
         val timestamp: Timestamp? = null
-){
-        constructor()
-}
+)
