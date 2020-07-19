@@ -1,9 +1,7 @@
 package festusyuma.com.glaid.model.fs
 
 data class FSUser (
-        val fullName: String,
-        val email: String,
-        val tel: String
-){
-    constructor()
-}
+        val fullName: String? = null,
+        val email: String?= null,
+        val tel: String? = null
+)
