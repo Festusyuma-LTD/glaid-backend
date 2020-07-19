@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.controller.admin
 
+import festusyuma.com.glaid.service.OrderService
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
 import org.springframework.http.HttpStatus
@@ -12,12 +13,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController("admin/booking")
 @RequestMapping("admin/booking")
 class BookingController(
-
+        private val service: OrderService
 ) {
 
     @GetMapping("assign_driver/{orderId}/{driverId}")
-    fun assignDriver(@PathVariable orderId: Long, @PathVariable driverId: String): ResponseEntity<Response> {
-        val req = service.createOrder(orderRequest)
+    fun assignDriver(@PathVariable orderId: Long, @PathVariable driverId: Long): ResponseEntity<Response> {
+        val req = service.assignDriverToOrder(orderId, driverId)
 
         return if (req.status == 200) {
             response(data = req.data)

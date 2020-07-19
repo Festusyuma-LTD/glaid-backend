@@ -1,6 +1,5 @@
 package festusyuma.com.glaid.service
 
-import com.google.firebase.cloud.FirestoreClient
 import festusyuma.com.glaid.dto.AddressRequest
 import festusyuma.com.glaid.dto.OrderRequest
 import festusyuma.com.glaid.dto.PaystackTransaction
@@ -23,7 +22,9 @@ class OrderService(
         private val orderStatusRepo: OrderStatusRepo,
         private val paymentRepo: PaymentRepo,
         private val walletRepo: WalletRepo,
-        private val customerRepo: CustomerRepo
+        private val customerRepo: CustomerRepo,
+        private val driverRepo: DriverRepo,
+        private val truckRepo: TruckRepo
 ) {
 
     fun createOrder(orderRequest: OrderRequest): Response {
@@ -207,7 +208,42 @@ class OrderService(
     }
 
     fun assignDriverToOrder(orderId: Long, driverId: Long): Response {
+        val order = orderRepo.findByIdOrNull(orderId)
+        var errorMsg = ""
 
-        return serviceResponse()
+        if (order != null) {
+            val driver = driverRepo.findByIdOrNull(driverId)
+
+            if (driver != null) {
+                val truck = truckRepo.findByDriver(driver)
+
+                if (truck != null) {
+
+                    if (!driverAssignedToOrder(driver)) {
+
+                        order.driver = driver
+                        order.truck = truck
+                        orderRepo.save(order)
+                        setFsPendingOrderDriver(order, driver, truck)
+
+                    }else errorMsg = DRIVER_BUSY
+                }else errorMsg = DRIVER_HAS_NO_TRUCK
+            }else errorMsg = INVALID_DRIVER_ID
+        }else errorMsg = INVALID_ORDER_ID
+
+        return serviceResponse(400, errorMsg)
+    }
+
+    fun driverAssignedToOrder(driver: Driver): Boolean {
+        val completed = orderStatusRepo.findByIdOrNull(4)
+        if (completed != null) {
+            orderRepo.findByDriverAndStatusNot(driver, completed) ?: return false
+        }
+
+        return true
+    }
+
+    private fun setFsPendingOrderDriver(order: Orders, driver: Driver, truck: GasTruck) {
+
     }
 }
