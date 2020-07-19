@@ -33,7 +33,7 @@ class OrderService(
                 return serviceResponse(400, "an unknown error occurred")
 
         if (orderRequest.paymentType in PaymentType.all()) {
-            if (orderRequest.quantity < 0) return serviceResponse(400, "quantity must be greater than 0")
+            if (orderRequest.quantity <= 0) return serviceResponse(400, "quantity must be greater than 0")
             val gasType = gasRepo.findByIdOrNull(orderRequest.gasTypeId)?:
                     return serviceResponse(400, "invalid gas id")
 
@@ -228,9 +228,13 @@ class OrderService(
 
                         order.driver = driver
                         order.truck = truck
+                        order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DRIVER_ASSIGNED)
+                                ?: return serviceResponse(400, message = ERROR_OCCURRED_MSG)
+
                         orderRepo.save(order)
                         setFsPendingOrderDriver(order, driver, truck)
 
+                        return serviceResponse(400, message = "Driver assigned to order")
                     }else errorMsg = DRIVER_BUSY
                 }else errorMsg = DRIVER_HAS_NO_TRUCK
             }else errorMsg = INVALID_DRIVER_ID
@@ -260,6 +264,6 @@ class OrderService(
                 "status" to OrderStatusCode.DRIVER_ASSIGNED
         )
 
-        pendingOrdersRef.set(values)
+        pendingOrdersRef.update(values)
     }
 }
