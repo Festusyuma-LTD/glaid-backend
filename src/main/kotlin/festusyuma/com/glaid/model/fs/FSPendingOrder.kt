@@ -1,7 +1,7 @@
 package festusyuma.com.glaid.model.fs
 
+import com.google.cloud.Timestamp
 import com.google.cloud.firestore.annotation.ServerTimestamp
-import java.security.Timestamp
 
 data class FSPendingOrder (
         val user: FSUser?= null,
