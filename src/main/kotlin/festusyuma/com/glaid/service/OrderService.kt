@@ -213,6 +213,10 @@ class OrderService(
         var errorMsg = ""
 
         if (order != null) {
+            if (order.driver != null) {
+                return serviceResponse(400, DRIVER_ASSIGNED)
+            }
+
             val driver = driverRepo.findByIdOrNull(driverId)
 
             if (driver != null) {
