@@ -5,6 +5,7 @@ import festusyuma.com.glaid.dto.OrderRequest
 import festusyuma.com.glaid.dto.PaystackTransaction
 import festusyuma.com.glaid.model.*
 import festusyuma.com.glaid.model.fs.FSPendingOrder
+import festusyuma.com.glaid.model.fs.FSTruck
 import festusyuma.com.glaid.model.fs.FSUser
 import festusyuma.com.glaid.repository.*
 import festusyuma.com.glaid.util.*
@@ -244,6 +245,17 @@ class OrderService(
     }
 
     private fun setFsPendingOrderDriver(order: Orders, driver: Driver, truck: GasTruck) {
+        val fsDriver = FSUser(driver.user.fullName, driver.user.email, driver.user.tel)
+        val fsTruck = FSTruck(truck.make, truck.model, truck.year, truck.color)
 
+        val pendingOrdersRef = db.collection(PENDING_ORDERS).document(order.id.toString())
+        val values = mutableMapOf(
+                "driver" to fsDriver,
+                "truck" to fsTruck,
+                "driverId" to driver.user.id,
+                "status" to OrderStatusCode.DRIVER_ASSIGNED
+        )
+
+        pendingOrdersRef.set(values)
     }
 }
