@@ -205,4 +205,9 @@ class OrderService(
             ))
         }else serviceResponse(400, "invalid order id")
     }
+
+    fun assignDriverToOrder(orderId: Long, driverId: Long): Response {
+
+        return serviceResponse()
+    }
 }
