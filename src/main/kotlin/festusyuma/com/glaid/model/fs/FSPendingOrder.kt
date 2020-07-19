@@ -14,4 +14,6 @@ data class FSPendingOrder (
 
         @ServerTimestamp
         val timestamp: Timestamp? = null
-)
+){
+        constructor()
+}

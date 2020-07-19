@@ -4,4 +4,6 @@ data class FSUser (
         val fullName: String,
         val email: String,
         val tel: String
-)
+){
+    constructor()
+}
