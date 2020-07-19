@@ -66,7 +66,7 @@ class OrderService(
                     customer.orders.add(order)
                     customerRepo.save(customer)
 
-                    /*saveFSPendingOrder(order, customer.user)*/
+                    saveFSPendingOrder(order, customer.user)
                     serviceResponse(message = "order placed", data = order)
                 }else serviceResponse(400, order.payment?.status?: "an unknown error occurred")
             }
