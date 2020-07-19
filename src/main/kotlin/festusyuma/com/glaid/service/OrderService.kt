@@ -30,7 +30,7 @@ class OrderService(
         val customer = customerService.getLoggedInCustomer()?:
                 return serviceResponse(400, "an unknown error occurred")
 
-        if (orderRequest.paymentType in listOf("card", "wallet", "on_delivery")) {
+        if (orderRequest.paymentType in PaymentType.all()) {
             if (orderRequest.quantity < 0) return serviceResponse(400, "quantity must be greater than 0")
             val gasType = gasRepo.findByIdOrNull(orderRequest.gasTypeId)?:
                     return serviceResponse(400, "invalid gas id")
@@ -60,7 +60,7 @@ class OrderService(
             setOrderPayment(order, orderRequest)
 
             if (order.payment != null) {
-                return if (order.payment?.status == "success" || order.payment?.type == "on_delivery") {
+                return if (order.payment?.status == "success" || order.payment?.type == PaymentType.CASH) {
                     paymentRepo.save(order.payment!!)
                     order = orderRepo.save(order)
                     customer.orders.add(order)
@@ -128,8 +128,8 @@ class OrderService(
         order.payment = payment
 
         when (payment.type) {
-            "card" -> chargeCard(payment, orderRequest)
-            "wallet" -> chargeWallet(payment)
+            PaymentType.CARD -> chargeCard(payment, orderRequest)
+            PaymentType.WALLET -> chargeWallet(payment)
             else -> return
         }
     }
@@ -150,6 +150,7 @@ class OrderService(
                 payment.status = "success"
             }else payment.status = "failed: ${transaction.gatewayResponse}"
             payment.paymentCard = card
+            payment.reference = transaction.reference
 
             return
         }

@@ -11,6 +11,7 @@ data class FSPendingOrder (
         val amount: Double?= null,
         val driverId: String? = null,
         val driver: FSUser? = null,
+        val status: Long? = 1,
 
         @ServerTimestamp
         val timestamp: Timestamp? = null
