@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.model
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import javax.persistence.Entity
 import javax.persistence.OneToOne
 
@@ -12,5 +13,6 @@ data class GasTruck (
         var color: String,
 
         @OneToOne
+        @JsonIgnoreProperties("orders.truck")
         var driver: Driver? = null
 ): Common()

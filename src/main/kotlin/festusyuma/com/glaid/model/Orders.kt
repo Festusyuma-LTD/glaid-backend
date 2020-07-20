@@ -12,6 +12,7 @@ data class Orders(
         var driver: Driver? = null,
 
         @ManyToOne
+        @JsonIgnoreProperties("driver")
         var truck: GasTruck? = null,
 
         @ManyToOne
