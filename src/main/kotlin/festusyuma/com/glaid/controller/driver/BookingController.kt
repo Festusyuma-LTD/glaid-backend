@@ -23,4 +23,13 @@ class BookingController(
             response(message = req.message)
         }else response(HttpStatus.BAD_REQUEST, req.message)
     }
+
+    @GetMapping("complete_trip")
+    fun completeTrip(): ResponseEntity<Response> {
+        val req = orderService.completeTrip()
+
+        return if (req.status == 200) {
+            response(message = req.message)
+        }else response(HttpStatus.BAD_REQUEST, req.message)
+    }
 }

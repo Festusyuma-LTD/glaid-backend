@@ -289,7 +289,7 @@ class OrderService(
         return serviceResponse(message = TRIP_STARTED)
     }
 
-    private fun completeTrip(): Response {
+    fun completeTrip(): Response {
         val driver = driverService.getLoggedInDriver()
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
