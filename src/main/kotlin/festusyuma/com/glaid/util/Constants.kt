@@ -51,4 +51,7 @@ const val INVALID_DRIVER_ID = "Invalid driver id"
 const val DRIVER_HAS_NO_TRUCK = "Driver has not been assigned to any truck yet"
 const val DRIVER_BUSY = "Driver is still has pending order"
 const val DRIVER_ASSIGNED = "A driver has been assigned to this order"
+const val NO_PENDING_ORDER = "no pending order"
+const val TRIP_STARTED = "trip started"
+const val ORDER_COMPLETED = "order completed"
 

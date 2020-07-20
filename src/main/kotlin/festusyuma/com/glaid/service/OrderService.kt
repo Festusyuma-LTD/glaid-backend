@@ -18,6 +18,7 @@ class OrderService(
         private val paymentCardService: PaymentCardService,
         private val paymentService: PaymentService,
         private val addressService: AddressService,
+        private val driverService: DriverService,
         private val gasRepo: GasRepo,
         private val orderRepo: OrderRepo,
         private val orderStatusRepo: OrderStatusRepo,
@@ -268,5 +269,49 @@ class OrderService(
         )
 
         pendingOrdersRef.update(values)
+    }
+
+    fun startTrip(): Response {
+        val driver = driverService.getLoggedInDriver()
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val status = orderStatusRepo.findByIdOrNull(2)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val order = orderRepo.findByDriverAndStatus(driver, status)
+                ?:return serviceResponse(400, NO_PENDING_ORDER)
+
+        order.status = orderStatusRepo.findByIdOrNull(3)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        orderRepo.save(order)
+        setFsPendingOrderUpdateStatus(order.id, status.id)
+        return serviceResponse(message = TRIP_STARTED)
+    }
+
+    fun completeTrip(): Response {
+        val driver = driverService.getLoggedInDriver()
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val status = orderStatusRepo.findByIdOrNull(3)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val order = orderRepo.findByDriverAndStatus(driver, status)
+                ?:return serviceResponse(400, NO_PENDING_ORDER)
+
+        order.status = orderStatusRepo.findByIdOrNull(4)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        orderRepo.save(order)
+        setFsPendingOrderUpdateStatus(order.id, status.id)
+        return serviceResponse(message = ORDER_COMPLETED)
+    }
+
+    private fun setFsPendingOrderUpdateStatus(orderId: Long?, statusId: Long?) {
+        if (orderId != null && statusId != null) {
+            val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
+            val values: MutableMap<String, Any> = mutableMapOf("status" to statusId)
+            pendingOrdersRef.update(values)
+        }
     }
 }
