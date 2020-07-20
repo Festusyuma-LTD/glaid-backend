@@ -285,16 +285,8 @@ class OrderService(
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
         orderRepo.save(order)
-        setFsPendingOrderTripStarted(order.id)
+        setFsPendingOrderUpdateStatus(order.id, status.id)
         return serviceResponse(message = TRIP_STARTED)
-    }
-
-    private fun setFsPendingOrderTripStarted(orderId: Long?) {
-        if (orderId != null) {
-            val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
-            val values: MutableMap<String, Any> = mutableMapOf("status" to 3)
-            pendingOrdersRef.update(values)
-        }
     }
 
     private fun completeTrip(): Response {
@@ -311,14 +303,14 @@ class OrderService(
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
         orderRepo.save(order)
-        setFsPendingOrderTripEnded(order.id)
+        setFsPendingOrderUpdateStatus(order.id, status.id)
         return serviceResponse(message = ORDER_COMPLETED)
     }
 
-    private fun setFsPendingOrderTripEnded(orderId: Long?) {
-        if (orderId != null) {
+    private fun setFsPendingOrderUpdateStatus(orderId: Long?, statusId: Long?) {
+        if (orderId != null && statusId != null) {
             val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
-            val values: MutableMap<String, Any> = mutableMapOf("status" to 4)
+            val values: MutableMap<String, Any> = mutableMapOf("status" to statusId)
             pendingOrdersRef.update(values)
         }
     }
