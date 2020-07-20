@@ -209,7 +209,7 @@ class OrderService(
     }
 
     fun assignDriverToOrder(orderId: Long, driverId: Long): Response {
-        val order = orderRepo.findByIdOrNull(orderId)
+        var order = orderRepo.findByIdOrNull(orderId)
         var errorMsg = ""
 
         if (order != null) {
@@ -231,7 +231,10 @@ class OrderService(
                         order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DRIVER_ASSIGNED)
                                 ?: return serviceResponse(400, message = ERROR_OCCURRED_MSG)
 
-                        orderRepo.save(order)
+                        order = orderRepo.save(order)
+                        driver.orders.add(order)
+                        driverRepo.save(driver)
+
                         setFsPendingOrderDriver(order, driver, truck)
 
                         return serviceResponse(400, message = "Driver assigned to order")
