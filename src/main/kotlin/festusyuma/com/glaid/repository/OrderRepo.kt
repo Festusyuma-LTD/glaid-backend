@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository
 interface OrderRepo: CrudRepository<Orders, Long> {
     fun findByCustomer(customer: Customer): List<Orders>
     fun findByDriverAndStatusNot(driver: Driver, status: OrderStatus): Orders?
+    fun findByStatus(status: OrderStatus): Orders?
+    fun findByDriverAndStatus(driver: Driver, status: OrderStatus): Orders?
 }

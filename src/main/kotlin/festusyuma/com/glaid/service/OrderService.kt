@@ -18,6 +18,7 @@ class OrderService(
         private val paymentCardService: PaymentCardService,
         private val paymentService: PaymentService,
         private val addressService: AddressService,
+        private val driverService: DriverService,
         private val gasRepo: GasRepo,
         private val orderRepo: OrderRepo,
         private val orderStatusRepo: OrderStatusRepo,
@@ -268,5 +269,31 @@ class OrderService(
         )
 
         pendingOrdersRef.update(values)
+    }
+
+    fun startTrip(): Response {
+        val driver = driverService.getLoggedInDriver()?:
+                return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val status = orderStatusRepo.findByIdOrNull(2)?:
+                return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        var order = orderRepo.findByDriverAndStatus(driver, status)?:
+                return serviceResponse(400, NO_PENDING_ORDER)
+
+        order.status = orderStatusRepo.findByIdOrNull(3)?:
+                return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        order = orderRepo.save(order)
+        setFsPendingOrderTripStarted(order.id)
+        return serviceResponse(message = TRIP_STARTED)
+    }
+
+    private fun setFsPendingOrderTripStarted(orderId: Long?) {
+        if (orderId != null) {
+            val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
+            val values: MutableMap<String, Any> = mutableMapOf("status" to 3)
+            pendingOrdersRef.update(values)
+        }
     }
 }
