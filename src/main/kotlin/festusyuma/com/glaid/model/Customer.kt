@@ -25,6 +25,6 @@ data class Customer (
 
         @OneToMany
         @OrderBy("id DESC")
-        @JsonIgnoreProperties("customer")
+        @JsonIgnoreProperties("customer", "driver.orders")
         var orders: MutableList<Orders> = mutableListOf()
 ): Common()
