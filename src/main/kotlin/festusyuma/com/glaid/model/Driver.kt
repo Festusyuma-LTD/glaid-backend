@@ -16,5 +16,5 @@ data class Driver (
 
         @OneToMany
         @JsonIgnoreProperties("driver")
-        var orders: List<Orders> = listOf()
+        var orders: MutableList<Orders> = mutableListOf()
 ): Common()
