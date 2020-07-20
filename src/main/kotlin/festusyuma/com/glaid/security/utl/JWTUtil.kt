@@ -16,6 +16,7 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -94,7 +95,7 @@ class JWTUtil (
     fun setUserDetails(clientToken: String){
         try {
             val decodedToken = FirebaseAuth.getInstance().verifyIdToken(clientToken)
-            val user = userRepo.findByEmail(decodedToken.uid)
+            val user = userRepo.findByIdOrNull(decodedToken.uid.toLong())
 
             if (user != null) {
                 userDetails = UserDetails(user)

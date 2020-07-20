@@ -1,16 +1,18 @@
 package festusyuma.com.glaid.model.fs
 
+import com.google.cloud.Timestamp
 import com.google.cloud.firestore.annotation.ServerTimestamp
-import java.security.Timestamp
+import festusyuma.com.glaid.util.OrderStatusCode
 
 data class FSPendingOrder (
-        val user: FSUser,
-        val quantity: Double,
-        val gasType: String,
-        val gasTypeUnit: String,
-        val amount: Double,
-        val driverId: String? = null,
-        val driver: FSUser? = null,
+        var user: FSUser?= null,
+        var quantity: Double?= null,
+        var gasType: String?= null,
+        var gasTypeUnit: String?= null,
+        var amount: Double?= null,
+        var driverId: String? = null,
+        var driver: FSUser? = null,
+        var status: Long? = OrderStatusCode.PENDING,
 
         @ServerTimestamp
         val timestamp: Timestamp? = null

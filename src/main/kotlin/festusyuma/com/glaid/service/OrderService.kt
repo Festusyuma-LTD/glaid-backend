@@ -1,11 +1,11 @@
 package festusyuma.com.glaid.service
 
-import com.google.firebase.cloud.FirestoreClient
 import festusyuma.com.glaid.dto.AddressRequest
 import festusyuma.com.glaid.dto.OrderRequest
 import festusyuma.com.glaid.dto.PaystackTransaction
 import festusyuma.com.glaid.model.*
 import festusyuma.com.glaid.model.fs.FSPendingOrder
+import festusyuma.com.glaid.model.fs.FSTruck
 import festusyuma.com.glaid.model.fs.FSUser
 import festusyuma.com.glaid.repository.*
 import festusyuma.com.glaid.util.*
@@ -18,20 +18,23 @@ class OrderService(
         private val paymentCardService: PaymentCardService,
         private val paymentService: PaymentService,
         private val addressService: AddressService,
+        private val driverService: DriverService,
         private val gasRepo: GasRepo,
         private val orderRepo: OrderRepo,
         private val orderStatusRepo: OrderStatusRepo,
         private val paymentRepo: PaymentRepo,
         private val walletRepo: WalletRepo,
-        private val customerRepo: CustomerRepo
+        private val customerRepo: CustomerRepo,
+        private val driverRepo: DriverRepo,
+        private val truckRepo: TruckRepo
 ) {
 
     fun createOrder(orderRequest: OrderRequest): Response {
         val customer = customerService.getLoggedInCustomer()?:
                 return serviceResponse(400, "an unknown error occurred")
 
-        if (orderRequest.paymentType in listOf("card", "wallet", "on_delivery")) {
-            if (orderRequest.quantity < 0) return serviceResponse(400, "quantity must be greater than 0")
+        if (orderRequest.paymentType in PaymentType.all()) {
+            if (orderRequest.quantity <= 0) return serviceResponse(400, "quantity must be greater than 0")
             val gasType = gasRepo.findByIdOrNull(orderRequest.gasTypeId)?:
                     return serviceResponse(400, "invalid gas id")
 
@@ -41,11 +44,13 @@ class OrderService(
             val deliveryAddress = getDeliveryAddress(orderRequest.deliveryAddress)
                     ?: return serviceResponse(400, "invalid delivery address")
 
-            if (deliveryAddress.type == "business" && orderRequest.quantity < getMinimumBusinessDelivery()) {
+            if (deliveryAddress.type == AddressType.BUSINESS && orderRequest.quantity < getMinimumBusinessDelivery()) {
                 return serviceResponse(400, "Business orders have to be a minimum of 5000 liters")
             }
 
-            val order = Orders(
+            val scheduledData = if (deliveryAddress.type == AddressType.HOME) null else orderRequest.scheduledDate
+
+            var order = Orders(
                     customer = customer,
                     gasType = gasType,
                     deliveryAddress = deliveryAddress,
@@ -53,16 +58,16 @@ class OrderService(
                     amount = total,
                     deliveryPrice = delivery,
                     tax = tax,
-                    scheduledDate = orderRequest.scheduledDate,
+                    scheduledDate = scheduledData,
                     status = orderStatusRepo.findByIdOrNull(1)?: return serviceResponse(400, "an unknown error occurred")
             )
 
             setOrderPayment(order, orderRequest)
 
             if (order.payment != null) {
-                return if (order.payment?.status == "success" || order.payment?.type == "on_delivery") {
+                return if (order.payment?.status == "success" || order.payment?.type == PaymentType.CASH) {
                     paymentRepo.save(order.payment!!)
-                    orderRepo.save(order)
+                    order = orderRepo.save(order)
                     customer.orders.add(order)
                     customerRepo.save(customer)
 
@@ -128,8 +133,8 @@ class OrderService(
         order.payment = payment
 
         when (payment.type) {
-            "card" -> chargeCard(payment, orderRequest)
-            "wallet" -> chargeWallet(payment)
+            PaymentType.CARD -> chargeCard(payment, orderRequest)
+            PaymentType.WALLET -> chargeWallet(payment)
             else -> return
         }
     }
@@ -150,6 +155,7 @@ class OrderService(
                 payment.status = "success"
             }else payment.status = "failed: ${transaction.gatewayResponse}"
             payment.paymentCard = card
+            payment.reference = transaction.reference
 
             return
         }
@@ -201,5 +207,111 @@ class OrderService(
                     "trackingId" to null
             ))
         }else serviceResponse(400, "invalid order id")
+    }
+
+    fun assignDriverToOrder(orderId: Long, driverId: Long): Response {
+        var order = orderRepo.findByIdOrNull(orderId)
+        var errorMsg = ""
+
+        if (order != null) {
+            if (order.driver != null) {
+                return serviceResponse(400, DRIVER_ASSIGNED)
+            }
+
+            val driver = driverRepo.findByIdOrNull(driverId)
+
+            if (driver != null) {
+                val truck = truckRepo.findByDriver(driver)
+
+                if (truck != null) {
+
+                    if (!driverAssignedToOrder(driver)) {
+
+                        order.driver = driver
+                        order.truck = truck
+                        order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DRIVER_ASSIGNED)
+                                ?: return serviceResponse(400, message = ERROR_OCCURRED_MSG)
+
+                        order = orderRepo.save(order)
+                        driver.orders.add(order)
+                        driverRepo.save(driver)
+
+                        setFsPendingOrderDriver(order, driver, truck)
+
+                        return serviceResponse(400, message = "Driver assigned to order")
+                    }else errorMsg = DRIVER_BUSY
+                }else errorMsg = DRIVER_HAS_NO_TRUCK
+            }else errorMsg = INVALID_DRIVER_ID
+        }else errorMsg = INVALID_ORDER_ID
+
+        return serviceResponse(400, errorMsg)
+    }
+
+    fun driverAssignedToOrder(driver: Driver): Boolean {
+        val completed = orderStatusRepo.findByIdOrNull(4)
+        if (completed != null) {
+            orderRepo.findByDriverAndStatusNot(driver, completed) ?: return false
+        }
+
+        return true
+    }
+
+    private fun setFsPendingOrderDriver(order: Orders, driver: Driver, truck: GasTruck) {
+        val fsDriver = FSUser(driver.user.fullName, driver.user.email, driver.user.tel)
+        val fsTruck = FSTruck(truck.make, truck.model, truck.year, truck.color)
+
+        val pendingOrdersRef = db.collection(PENDING_ORDERS).document(order.id.toString())
+        val values = mutableMapOf(
+                "driver" to fsDriver,
+                "truck" to fsTruck,
+                "driverId" to driver.user.id,
+                "status" to OrderStatusCode.DRIVER_ASSIGNED
+        )
+
+        pendingOrdersRef.update(values)
+    }
+
+    fun startTrip(): Response {
+        val driver = driverService.getLoggedInDriver()
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val status = orderStatusRepo.findByIdOrNull(2)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val order = orderRepo.findByDriverAndStatus(driver, status)
+                ?:return serviceResponse(400, NO_PENDING_ORDER)
+
+        order.status = orderStatusRepo.findByIdOrNull(3)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        orderRepo.save(order)
+        setFsPendingOrderUpdateStatus(order.id, status.id)
+        return serviceResponse(message = TRIP_STARTED)
+    }
+
+    fun completeTrip(): Response {
+        val driver = driverService.getLoggedInDriver()
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val status = orderStatusRepo.findByIdOrNull(3)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val order = orderRepo.findByDriverAndStatus(driver, status)
+                ?:return serviceResponse(400, NO_PENDING_ORDER)
+
+        order.status = orderStatusRepo.findByIdOrNull(4)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        orderRepo.save(order)
+        setFsPendingOrderUpdateStatus(order.id, status.id)
+        return serviceResponse(message = ORDER_COMPLETED)
+    }
+
+    private fun setFsPendingOrderUpdateStatus(orderId: Long?, statusId: Long?) {
+        if (orderId != null && statusId != null) {
+            val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
+            val values: MutableMap<String, Any> = mutableMapOf("status" to statusId)
+            pendingOrdersRef.update(values)
+        }
     }
 }

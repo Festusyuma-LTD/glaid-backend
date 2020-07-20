@@ -12,6 +12,7 @@ data class Orders(
         var driver: Driver? = null,
 
         @ManyToOne
+        @JsonIgnoreProperties("driver")
         var truck: GasTruck? = null,
 
         @ManyToOne
@@ -31,7 +32,7 @@ data class Orders(
         var amount: Double,
         var deliveryPrice: Double,
         var tax: Double,
-        var scheduledDate: LocalDateTime = LocalDateTime.now(),
+        var scheduledDate: LocalDateTime? = null,
 
         @ManyToOne
         var status: OrderStatus
