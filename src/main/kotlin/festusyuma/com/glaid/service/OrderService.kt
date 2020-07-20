@@ -272,19 +272,19 @@ class OrderService(
     }
 
     fun startTrip(): Response {
-        val driver = driverService.getLoggedInDriver()?:
-                return serviceResponse(400, ERROR_OCCURRED_MSG)
+        val driver = driverService.getLoggedInDriver()
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
-        val status = orderStatusRepo.findByIdOrNull(2)?:
-                return serviceResponse(400, ERROR_OCCURRED_MSG)
+        val status = orderStatusRepo.findByIdOrNull(2)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
-        var order = orderRepo.findByDriverAndStatus(driver, status)?:
-                return serviceResponse(400, NO_PENDING_ORDER)
+        val order = orderRepo.findByDriverAndStatus(driver, status)
+                ?:return serviceResponse(400, NO_PENDING_ORDER)
 
-        order.status = orderStatusRepo.findByIdOrNull(3)?:
-                return serviceResponse(400, ERROR_OCCURRED_MSG)
+        order.status = orderStatusRepo.findByIdOrNull(3)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
-        order = orderRepo.save(order)
+        orderRepo.save(order)
         setFsPendingOrderTripStarted(order.id)
         return serviceResponse(message = TRIP_STARTED)
     }
@@ -293,6 +293,32 @@ class OrderService(
         if (orderId != null) {
             val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
             val values: MutableMap<String, Any> = mutableMapOf("status" to 3)
+            pendingOrdersRef.update(values)
+        }
+    }
+
+    private fun completeTrip(): Response {
+        val driver = driverService.getLoggedInDriver()
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val status = orderStatusRepo.findByIdOrNull(3)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val order = orderRepo.findByDriverAndStatus(driver, status)
+                ?:return serviceResponse(400, NO_PENDING_ORDER)
+
+        order.status = orderStatusRepo.findByIdOrNull(4)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        orderRepo.save(order)
+        setFsPendingOrderTripEnded(order.id)
+        return serviceResponse(message = ORDER_COMPLETED)
+    }
+
+    private fun setFsPendingOrderTripEnded(orderId: Long?) {
+        if (orderId != null) {
+            val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
+            val values: MutableMap<String, Any> = mutableMapOf("status" to 4)
             pendingOrdersRef.update(values)
         }
     }
