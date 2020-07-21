@@ -312,7 +312,7 @@ class OrderService(
         if (orderId != null && statusId != null) {
             println("entered")
             val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
-            print(pendingOrdersRef.get().get())
+            print(pendingOrdersRef.get().get().get("status"))
             val values: MutableMap<String, Any> = mutableMapOf("status" to statusId)
             println("got here")
             pendingOrdersRef.update(values)
