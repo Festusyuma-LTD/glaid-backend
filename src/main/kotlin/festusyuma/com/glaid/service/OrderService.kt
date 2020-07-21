@@ -308,10 +308,14 @@ class OrderService(
     }
 
     private fun setFsPendingOrderUpdateStatus(orderId: Long?, statusId: Long?) {
+        println("called")
         if (orderId != null && statusId != null) {
+            println("entered")
             val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
             val values: MutableMap<String, Any> = mutableMapOf("status" to statusId)
+            println("got here")
             pendingOrdersRef.update(values)
+            println("comleted")
         }
     }
 }
