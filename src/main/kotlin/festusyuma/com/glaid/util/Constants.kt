@@ -44,7 +44,7 @@ class OrderStatusCode {
     }
 }
 
-//Error messages
+//messages
 const val ERROR_OCCURRED_MSG = "An error occurred"
 const val INVALID_ORDER_ID = "Invalid order id"
 const val INVALID_DRIVER_ID = "Invalid driver id"
