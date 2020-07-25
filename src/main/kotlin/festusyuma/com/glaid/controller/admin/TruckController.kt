@@ -17,6 +17,11 @@ class TruckController(
         private val truckRepo: TruckRepo
 ) {
 
+    @GetMapping("list")
+    fun listTruck(): ResponseEntity<Response> {
+        return response(data = truckRepo.findAll())
+    }
+
     @PostMapping("save")
     fun createTruck(@RequestBody truckRequest: TruckRequest): ResponseEntity<Response> {
         val req = service.saveTruck(truckRequest)
