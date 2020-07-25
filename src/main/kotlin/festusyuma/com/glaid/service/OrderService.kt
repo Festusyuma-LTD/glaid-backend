@@ -202,10 +202,18 @@ class OrderService(
                 ?: return serviceResponse(400, "invalid order id")
 
         return if (order.customer == customer) {
-            return serviceResponse(data = mapOf(
-                    "order" to order,
-                    "trackingId" to null
-            ))
+            serviceResponse(data = order)
+        }else serviceResponse(400, "invalid order id")
+    }
+
+    fun getDriverOrderDetails(orderId: Long): Response {
+        val driver = driverService.getLoggedInDriver()
+                ?: return serviceResponse(400, "an unknown error occurred")
+        val order = orderRepo.findByIdOrNull(orderId)
+                ?: return serviceResponse(400, "invalid order id")
+
+        return if (order.driver == driver) {
+            serviceResponse(data = order)
         }else serviceResponse(400, "invalid order id")
     }
 
