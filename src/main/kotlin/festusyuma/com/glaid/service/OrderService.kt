@@ -296,8 +296,9 @@ class OrderService(
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
         println("got here")
+        println(order.status)
         order = orderRepo.save(order)
-        println(order)
+        println(order.status)
         setFsPendingOrderUpdateStatus(order.id, OrderStatusCode.DRIVER_ASSIGNED)
         return serviceResponse(message = TRIP_STARTED)
     }
