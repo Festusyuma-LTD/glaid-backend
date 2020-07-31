@@ -1,14 +1,12 @@
 package festusyuma.com.glaid.controller.driver
 
+import festusyuma.com.glaid.dto.RatingRequest
 import festusyuma.com.glaid.service.OrderService
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController("driver/booking")
 @RequestMapping("driver/booking")
@@ -19,6 +17,15 @@ class BookingController(
     @GetMapping("{id}")
     fun orderDetails(@PathVariable id: Long): ResponseEntity<Response> {
         val req = orderService.getDriverOrderDetails(id)
+
+        return if (req.status == 200) {
+            response(message = req.message, data = req.data)
+        }else response(HttpStatus.BAD_REQUEST, req.message)
+    }
+
+    @GetMapping("rate_customer")
+    fun rateDriver(@RequestBody ratingRequest: RatingRequest): ResponseEntity<Response> {
+        val req = orderService.rateCustomer(ratingRequest)
 
         return if (req.status == 200) {
             response(message = req.message, data = req.data)

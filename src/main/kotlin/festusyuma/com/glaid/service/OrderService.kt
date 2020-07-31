@@ -3,6 +3,7 @@ package festusyuma.com.glaid.service
 import festusyuma.com.glaid.dto.AddressRequest
 import festusyuma.com.glaid.dto.OrderRequest
 import festusyuma.com.glaid.dto.PaystackTransaction
+import festusyuma.com.glaid.dto.RatingRequest
 import festusyuma.com.glaid.model.*
 import festusyuma.com.glaid.model.fs.FSPendingOrder
 import festusyuma.com.glaid.model.fs.FSTruck
@@ -26,7 +27,9 @@ class OrderService(
         private val walletRepo: WalletRepo,
         private val customerRepo: CustomerRepo,
         private val driverRepo: DriverRepo,
-        private val truckRepo: TruckRepo
+        private val truckRepo: TruckRepo,
+        private val orderRatingRepo: OrderRatingRepo,
+        private val userRepo: UserRepo
 ) {
 
     fun createOrder(orderRequest: OrderRequest): Response {
@@ -289,11 +292,11 @@ class OrderService(
         val order = orderRepo.findByDriverAndStatus(driver, status)
                 ?:return serviceResponse(400, NO_PENDING_ORDER)
 
-        order.status = orderStatusRepo.findByIdOrNull(3)
+        order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DRIVER_ASSIGNED)
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
         orderRepo.save(order)
-        setFsPendingOrderUpdateStatus(order.id, order.status.id)
+        setFsPendingOrderUpdateStatus(order.id, OrderStatusCode.DRIVER_ASSIGNED)
         return serviceResponse(message = TRIP_STARTED)
     }
 
@@ -311,7 +314,7 @@ class OrderService(
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
         orderRepo.save(order)
-        setFsPendingOrderUpdateStatus(order.id, order.status.id)
+        setFsPendingOrderUpdateStatus(order.id, OrderStatusCode.DELIVERED)
         return serviceResponse(message = ORDER_COMPLETED)
     }
 
@@ -321,5 +324,54 @@ class OrderService(
             val values: MutableMap<String, Any> = mutableMapOf("status" to statusId)
             pendingOrdersRef.update(values)
         }
+    }
+
+    fun rateCustomer(ratingRequest: RatingRequest): Response {
+        val driver = driverService.getLoggedInDriver()?: return serviceResponse(400, ERROR_OCCURRED_MSG)
+        val order = orderRepo.findByIdOrNull(ratingRequest.orderId)?: return serviceResponse(400, INVALID_ORDER_ID)
+        if (order.driver != driver) return serviceResponse(400, INVALID_ORDER_ID)
+
+        return if (order.customerRating != null) {
+            var rating = OrderRating(order.customer.user, ratingRequest.rating)
+            rating = orderRatingRepo.save(rating)
+            order.customerRating = rating
+            orderRepo.save(order)
+
+            val customerRatings = orderRatingRepo.findByUser(order.customer.user)
+            val ratings = customerRatings.map { it.userRating }
+            val newCustomerRating = ratings.average()
+            order.customer.user.rating = newCustomerRating
+            userRepo.save(order.customer.user)
+
+            serviceResponse()
+
+        }else serviceResponse(400, CUSTOMER_RATED)
+    }
+
+    fun rateDriver(ratingRequest: RatingRequest): Response {
+        val customer = customerService.getLoggedInCustomer()?: return serviceResponse(400, ERROR_OCCURRED_MSG)
+        val order = orderRepo.findByIdOrNull(ratingRequest.orderId)?: return serviceResponse(400, INVALID_ORDER_ID)
+        val driver = order.driver
+        if (order.customer != customer) return serviceResponse(400, INVALID_ORDER_ID)
+
+        return if (order.driverRating != null) {
+            if (driver != null) {
+                var rating = OrderRating(driver.user, ratingRequest.rating)
+                rating = orderRatingRepo.save(rating)
+                order.driverRating = rating
+                orderRepo.save(order)
+
+                val driverRatings = orderRatingRepo.findByUser(driver.user)
+                val ratings = driverRatings.map { it.userRating }
+                val newDriverRating = ratings.average()
+                driver.user.rating = newDriverRating
+                userRepo.save(driver.user)
+
+                serviceResponse()
+            }
+
+            return serviceResponse()
+
+        }else serviceResponse(400, CUSTOMER_RATED)
     }
 }

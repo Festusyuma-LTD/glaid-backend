@@ -34,6 +34,12 @@ data class Orders(
         var tax: Double,
         var scheduledDate: LocalDateTime? = null,
 
+        @OneToOne
+        var driverRating: OrderRating? = null,
+
+        @OneToOne
+        var customerRating: OrderRating? = null,
+
         @ManyToOne
         var status: OrderStatus
 ): Common()
