@@ -24,7 +24,7 @@ class BookingController(
         }else response(HttpStatus.BAD_REQUEST, req.message)
     }
 
-    @GetMapping("rate_driver")
+    @PostMapping("rate_driver")
     fun rateDriver(@RequestBody ratingRequest: RatingRequest): ResponseEntity<Response> {
         val req = service.rateDriver(ratingRequest)
 
