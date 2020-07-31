@@ -195,7 +195,7 @@ class OrderService(
         val customer = customerService.getLoggedInCustomer()
                 ?: return serviceResponse(400, "an unknown error occurred")
 
-        return serviceResponse(data = orderRepo.findByCustomer(customer))
+        return serviceResponse(data = customer.orders)
     }
 
     fun getCustomerOrderDetails(orderId: Long): Response {
