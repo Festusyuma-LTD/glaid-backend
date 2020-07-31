@@ -286,20 +286,17 @@ class OrderService(
         val driver = driverService.getLoggedInDriver()
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
-        val status = orderStatusRepo.findByIdOrNull(2)
+        val status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DRIVER_ASSIGNED)
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
         var order = orderRepo.findByDriverAndStatus(driver, status)
                 ?:return serviceResponse(400, NO_PENDING_ORDER)
 
-        order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DRIVER_ASSIGNED)
+        order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.ON_THE_WAY)
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
-        println("got here")
-        println(order.status)
         order = orderRepo.save(order)
-        println(order.status)
-        setFsPendingOrderUpdateStatus(order.id, OrderStatusCode.DRIVER_ASSIGNED)
+        setFsPendingOrderUpdateStatus(order.id, OrderStatusCode.ON_THE_WAY)
         return serviceResponse(message = TRIP_STARTED)
     }
 
@@ -313,7 +310,7 @@ class OrderService(
         val order = orderRepo.findByDriverAndStatus(driver, status)
                 ?:return serviceResponse(400, NO_PENDING_ORDER)
 
-        order.status = orderStatusRepo.findByIdOrNull(4)
+        order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DELIVERED)
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
         orderRepo.save(order)
