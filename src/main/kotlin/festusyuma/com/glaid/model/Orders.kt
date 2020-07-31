@@ -35,9 +35,11 @@ data class Orders(
         var scheduledDate: LocalDateTime? = null,
 
         @OneToOne
+        @JsonIgnoreProperties("user")
         var driverRating: OrderRating? = null,
 
         @OneToOne
+        @JsonIgnoreProperties("user")
         var customerRating: OrderRating? = null,
 
         @ManyToOne

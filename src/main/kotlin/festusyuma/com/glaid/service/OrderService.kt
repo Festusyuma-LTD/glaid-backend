@@ -289,13 +289,15 @@ class OrderService(
         val status = orderStatusRepo.findByIdOrNull(2)
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
-        val order = orderRepo.findByDriverAndStatus(driver, status)
+        var order = orderRepo.findByDriverAndStatus(driver, status)
                 ?:return serviceResponse(400, NO_PENDING_ORDER)
 
         order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DRIVER_ASSIGNED)
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
-        orderRepo.save(order)
+        println("got here")
+        order = orderRepo.save(order)
+        println(order)
         setFsPendingOrderUpdateStatus(order.id, OrderStatusCode.DRIVER_ASSIGNED)
         return serviceResponse(message = TRIP_STARTED)
     }
