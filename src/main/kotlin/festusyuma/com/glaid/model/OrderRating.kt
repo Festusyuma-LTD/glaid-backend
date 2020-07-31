@@ -6,16 +6,8 @@ import javax.persistence.OneToOne
 
 @Entity
 data class OrderRating(
-
-        @OneToOne
-        val order: Orders,
-
         @ManyToOne
         val user: User,
 
-        @ManyToOne
-        val driver: Driver,
-
-        var userRating: Int,
-        var driverRating: Int
+        var userRating: Double
 ): Common()

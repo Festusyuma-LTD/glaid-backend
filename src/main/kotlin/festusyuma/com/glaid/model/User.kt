@@ -23,5 +23,7 @@ data class User (
 
         var active: Boolean = true,
         var credentialsExpired: Boolean = false,
-        var enabled: Boolean = true
+        var enabled: Boolean = true,
+
+        var rating: Double = 0.0
 ): Common()

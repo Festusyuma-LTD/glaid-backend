@@ -1,6 +1,7 @@
 package festusyuma.com.glaid.controller.customer
 
 import festusyuma.com.glaid.dto.OrderRequest
+import festusyuma.com.glaid.dto.RatingRequest
 import festusyuma.com.glaid.service.OrderService
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
@@ -20,6 +21,15 @@ class BookingController(
 
         return if (req.status == 200) {
             response(data = req.data)
+        }else response(HttpStatus.BAD_REQUEST, req.message)
+    }
+
+    @GetMapping("rate_driver")
+    fun rateDriver(@RequestBody ratingRequest: RatingRequest): ResponseEntity<Response> {
+        val req = service.rateDriver(ratingRequest)
+
+        return if (req.status == 200) {
+            response(message = req.message, data = req.data)
         }else response(HttpStatus.BAD_REQUEST, req.message)
     }
 
