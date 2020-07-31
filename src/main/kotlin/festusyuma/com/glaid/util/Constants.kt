@@ -55,4 +55,5 @@ const val NO_PENDING_ORDER = "no pending order"
 const val TRIP_STARTED = "trip started"
 const val ORDER_COMPLETED = "order completed"
 const val CUSTOMER_RATED = "Customer has been rated"
+const val DRIVER_RATED = "Driver has been rated"
 
