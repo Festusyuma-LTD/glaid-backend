@@ -331,7 +331,7 @@ class OrderService(
         val order = orderRepo.findByIdOrNull(ratingRequest.orderId)?: return serviceResponse(400, INVALID_ORDER_ID)
         if (order.driver != driver) return serviceResponse(400, INVALID_ORDER_ID)
 
-        return if (order.customerRating != null) {
+        return if (order.customerRating == null) {
             var rating = OrderRating(order.customer.user, ratingRequest.rating)
             rating = orderRatingRepo.save(rating)
             order.customerRating = rating
@@ -354,7 +354,7 @@ class OrderService(
         val driver = order.driver
         if (order.customer != customer) return serviceResponse(400, INVALID_ORDER_ID)
 
-        return if (order.driverRating != null) {
+        return if (order.driverRating == null) {
             if (driver != null) {
                 var rating = OrderRating(driver.user, ratingRequest.rating)
                 rating = orderRatingRepo.save(rating)
@@ -372,6 +372,6 @@ class OrderService(
 
             return serviceResponse()
 
-        }else serviceResponse(400, CUSTOMER_RATED)
+        }else serviceResponse(400, DRIVER_RATED)
     }
 }
