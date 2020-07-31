@@ -33,7 +33,7 @@ class BookingController(
         }else response(HttpStatus.BAD_REQUEST, req.message)
     }
 
-    @GetMapping("order/list")
+    @GetMapping("list")
     fun listOrders(): ResponseEntity<Response> {
         val req = service.getCustomerOrders()
 
