@@ -45,5 +45,7 @@ data class Orders(
         @ManyToOne
         var status: OrderStatus,
 
-        var driverAssignedDate: LocalDateTime? = null
+        var driverAssignedDate: LocalDateTime? = null,
+        var tripStarted: LocalDateTime? = null,
+        var tripEnded: LocalDateTime? = null
 ): Common()
