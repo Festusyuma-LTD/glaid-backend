@@ -300,6 +300,7 @@ class OrderService(
         order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.ON_THE_WAY)
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
+        order.tripStarted = LocalDateTime.now()
         order = orderRepo.save(order)
         setFsPendingOrderUpdateStatus(order.id, OrderStatusCode.ON_THE_WAY)
         return serviceResponse(message = TRIP_STARTED)
@@ -323,6 +324,7 @@ class OrderService(
                     ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
         }
 
+        order.tripEnded = LocalDateTime.now()
         orderRepo.save(order)
         setFsPendingOrderUpdateStatus(order.id, order.status.id)
         return serviceResponse(message = ORDER_COMPLETED)
