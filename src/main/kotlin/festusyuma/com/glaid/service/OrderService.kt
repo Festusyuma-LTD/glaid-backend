@@ -12,6 +12,7 @@ import festusyuma.com.glaid.repository.*
 import festusyuma.com.glaid.util.*
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class OrderService(
@@ -240,6 +241,7 @@ class OrderService(
 
                         order.driver = driver
                         order.truck = truck
+                        order.driverAssignedDate = LocalDateTime.now()
                         order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DRIVER_ASSIGNED)
                                 ?: return serviceResponse(400, message = ERROR_OCCURRED_MSG)
 

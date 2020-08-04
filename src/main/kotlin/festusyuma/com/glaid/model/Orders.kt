@@ -43,5 +43,7 @@ data class Orders(
         var customerRating: OrderRating? = null,
 
         @ManyToOne
-        var status: OrderStatus
+        var status: OrderStatus,
+
+        var driverAssignedDate: LocalDateTime? = null
 ): Common()

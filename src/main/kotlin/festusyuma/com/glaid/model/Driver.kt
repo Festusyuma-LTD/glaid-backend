@@ -16,5 +16,6 @@ data class Driver (
 
         @OneToMany
         @JsonIgnoreProperties("driver", "customer.orders", "truck.driver")
+        @OrderBy("driverAssignedDate DESC")
         var orders: MutableList<Orders> = mutableListOf()
 ): Common()
