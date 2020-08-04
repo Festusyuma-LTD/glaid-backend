@@ -46,7 +46,9 @@ class AddressService(
         if (address != null) {
             customer.address.remove(address)
             customerRepo.save(customer)
-        }else address = Address()
+        }
+
+        address = Address()
         address = saveAddressDetails(address, addressRequest)
 
         if (address.id == null) {

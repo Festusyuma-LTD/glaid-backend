@@ -49,4 +49,13 @@ class BookingController(
             response(message = req.message)
         }else response(HttpStatus.BAD_REQUEST, req.message)
     }
+
+    @GetMapping("{id}/confirm_payment")
+    fun confirmPayment(@PathVariable id: Long): ResponseEntity<Response> {
+        val req = orderService.confirmPayment(id)
+
+        return if (req.status == 200) {
+            response(message = req.message)
+        }else response(HttpStatus.BAD_REQUEST, req.message)
+    }
 }
