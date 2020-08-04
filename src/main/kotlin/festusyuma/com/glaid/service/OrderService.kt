@@ -10,7 +10,6 @@ import festusyuma.com.glaid.model.fs.FSTruck
 import festusyuma.com.glaid.model.fs.FSUser
 import festusyuma.com.glaid.repository.*
 import festusyuma.com.glaid.util.*
-import org.hibernate.criterion.Order
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -267,10 +266,8 @@ class OrderService(
     }
 
     fun driverAssignedToOrder(driver: Driver): Boolean {
-        val completed = orderStatusRepo.findByIdOrNull(4)
-        if (completed != null) {
-            orderRepo.findByDriverAndStatusNot(driver, completed) ?: return false
-        }
+        val status = orderStatusRepo.findAllById(listOf(OrderStatusCode.DELIVERED, OrderStatusCode.FAILED)).toList()
+        orderRepo.findByDriverAndStatusNotIn(driver, status) ?: return false
 
         return true
     }
@@ -351,7 +348,7 @@ class OrderService(
 
         val newStatus = if (success) {
             orderStatusRepo.findByIdOrNull(OrderStatusCode.DELIVERED)
-        }else orderStatusRepo.findByIdOrNull(OrderStatusCode.Failed)
+        }else orderStatusRepo.findByIdOrNull(OrderStatusCode.FAILED)
         newStatus?: return serviceResponse(400, ERROR_OCCURRED_MSG)
 
         val payment = order.payment?:return serviceResponse(400, ERROR_OCCURRED_MSG)
