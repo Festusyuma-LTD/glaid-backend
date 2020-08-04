@@ -327,7 +327,7 @@ class OrderService(
         }
 
         orderRepo.save(order)
-        setFsPendingOrderUpdateStatus(order.id, OrderStatusCode.DELIVERED)
+        setFsPendingOrderUpdateStatus(order.id, order.status.id)
         return serviceResponse(message = ORDER_COMPLETED)
     }
 
@@ -339,19 +339,28 @@ class OrderService(
         }
     }
 
-    fun confirmPayment(orderId: Long): Response {
+    fun confirmPayment(success: Boolean): Response {
         val driver = driverService.getLoggedInDriver()
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
-        val order = orderRepo.findByIdOrNull(orderId)
-                ?:return serviceResponse(400, NO_PENDING_ORDER)
-
-        if (order.driver != driver) return serviceResponse(400, NO_PENDING_ORDER)
-
-        order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DELIVERED)
+        val status = orderStatusRepo.findByIdOrNull(OrderStatusCode.PAYMENT_PENDING)
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
+        val order = orderRepo.findByDriverAndStatus(driver, status)
+                ?:return serviceResponse(400, NO_PENDING_ORDER)
+
+        val newStatus = if (success) {
+            orderStatusRepo.findByIdOrNull(OrderStatusCode.DELIVERED)
+        }else orderStatusRepo.findByIdOrNull(OrderStatusCode.Failed)
+        newStatus?: return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val payment = order.payment?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+        payment.status = if (success) PaymentStatus.SUCCESS else PaymentStatus.FAILED
+        paymentRepo.save(payment)
+
+        order.status = newStatus
         orderRepo.save(order)
+        setFsPendingOrderUpdateStatus(order.id, order.status.id)
         return serviceResponse(message = ORDER_COMPLETED)
     }
 
