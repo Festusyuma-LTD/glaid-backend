@@ -121,7 +121,7 @@ class OrderService(
             if (req.status == 200) {
                 req.data as Address
             }else null
-        }else addressService.saveAddress(addressRequest)
+        }else addressService.saveAddressAnonymous(addressRequest)
     }
 
     fun setOrderPayment(order: Orders, orderRequest: OrderRequest) {

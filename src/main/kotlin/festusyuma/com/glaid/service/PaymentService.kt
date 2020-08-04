@@ -10,6 +10,7 @@ import festusyuma.com.glaid.model.User
 import festusyuma.com.glaid.repository.CustomerRepo
 import festusyuma.com.glaid.repository.PaymentCardRepo
 import festusyuma.com.glaid.repository.PreferredPaymentRepo
+import festusyuma.com.glaid.util.PaymentType
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.getRequestFactory
 import festusyuma.com.glaid.util.serviceResponse
@@ -53,7 +54,7 @@ class PaymentService(
         val customer = customerService.getLoggedInCustomer()?:
             return serviceResponse(400, "an unknown error occurred")
 
-        if (preferredPaymentRequest.type !in listOf("wallet", "cash", "card")) return serviceResponse(400, "an unknown error occurred")
+        if (preferredPaymentRequest.type !in PaymentType.all()) return serviceResponse(400, "an unknown error occurred")
 
         if (customer.preferredPaymentMethod == null) {
             var preferredPaymentMethod = PreferredPaymentMethod(preferredPaymentRequest.type, preferredPaymentRequest.cardId)
@@ -65,7 +66,7 @@ class PaymentService(
             val preferredPaymentMethod = customer.preferredPaymentMethod
             if (preferredPaymentMethod != null) {
                 preferredPaymentMethod.type = preferredPaymentRequest.type
-                if (preferredPaymentMethod.type == "card") {
+                if (preferredPaymentMethod.type == PaymentType.CARD) {
                     if (preferredPaymentRequest.cardId != null) {
                         val paymentCard = cardRepo.findByIdOrNull(preferredPaymentRequest.cardId!!)
                                 ?: return serviceResponse(400, "Invalid card id")
