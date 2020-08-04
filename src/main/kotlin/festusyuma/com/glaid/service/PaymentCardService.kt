@@ -9,6 +9,7 @@ import festusyuma.com.glaid.repository.CustomerRepo
 import festusyuma.com.glaid.repository.PaymentCardRepo
 import festusyuma.com.glaid.repository.PaymentRepo
 import festusyuma.com.glaid.repository.PreferredPaymentRepo
+import festusyuma.com.glaid.util.PaymentStatus
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.getRequestFactory
 import festusyuma.com.glaid.util.serviceResponse
@@ -101,7 +102,7 @@ class PaymentCardService(
                     5000.0,
                     "card",
                     root.get("reference").asText(),
-                    "pending"
+                    PaymentStatus.PENDING
             )
 
             paymentRepo.save(payment)
