@@ -10,6 +10,7 @@ import festusyuma.com.glaid.model.fs.FSTruck
 import festusyuma.com.glaid.model.fs.FSUser
 import festusyuma.com.glaid.repository.*
 import festusyuma.com.glaid.util.*
+import org.hibernate.criterion.Order
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -69,7 +70,7 @@ class OrderService(
             setOrderPayment(order, orderRequest)
 
             if (order.payment != null) {
-                return if (order.payment?.status == "success" || order.payment?.type == PaymentType.CASH) {
+                return if (order.payment?.status == PaymentStatus.SUCCESS || order.payment?.type == PaymentType.CASH) {
                     paymentRepo.save(order.payment!!)
                     order = orderRepo.save(order)
                     customer.orders.add(order)
@@ -77,7 +78,7 @@ class OrderService(
 
                     saveFSPendingOrder(order, customer.user)
                     serviceResponse(message = "order placed", data = order)
-                }else serviceResponse(400, order.payment?.status?: "an unknown error occurred")
+                }else serviceResponse(400, order.payment!!.failedMessage)
             }
         }
 
@@ -130,7 +131,7 @@ class OrderService(
         var payment = Payment(
                 total,
                 orderRequest.paymentType,
-                status = "pending"
+                status = PaymentStatus.PENDING
         )
 
         payment = paymentRepo.save(payment)
@@ -156,15 +157,19 @@ class OrderService(
 
             val transaction = debitReq.data as PaystackTransaction
             if (debitReq.status == 200) {
-                payment.status = "success"
-            }else payment.status = "failed: ${transaction.gatewayResponse}"
+                payment.status = PaymentStatus.SUCCESS
+            }else {
+                payment.status = PaymentStatus.FAILED
+                payment.failedMessage = "failed: ${transaction.gatewayResponse}"
+            }
             payment.paymentCard = card
             payment.reference = transaction.reference
 
             return
         }
 
-        payment.status = "failed: an unknown error occurred"
+        payment.status = PaymentStatus.FAILED
+        payment.failedMessage = "failed: an unknown error occurred"
     }
 
     fun chargeWallet(payment: Payment) {
@@ -173,14 +178,15 @@ class OrderService(
         var amount = payment.amount
 
         if (wallet.wallet + wallet.bonus < amount) {
-            payment.status = "failed: insufficient funds"
+            payment.status = PaymentStatus.FAILED
+            payment.failedMessage = "failed: insufficient funds"
             return
         }
 
         if (wallet.bonus >= amount) {
             wallet.bonus -= amount
             walletRepo.save(wallet)
-            payment.status = "success"
+            payment.status = PaymentStatus.SUCCESS
 
             return
         }
@@ -188,7 +194,7 @@ class OrderService(
         wallet.bonus = 0.0
         amount -= wallet.bonus
         wallet.wallet -= amount
-        payment.status = "success"
+        payment.status = PaymentStatus.SUCCESS
         walletRepo.save(wallet)
     }
 
@@ -306,14 +312,19 @@ class OrderService(
         val driver = driverService.getLoggedInDriver()
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
-        val status = orderStatusRepo.findByIdOrNull(3)
+        val status = orderStatusRepo.findByIdOrNull(OrderStatusCode.ON_THE_WAY)
                 ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
 
         val order = orderRepo.findByDriverAndStatus(driver, status)
                 ?:return serviceResponse(400, NO_PENDING_ORDER)
 
-        order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DELIVERED)
-                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+        if (order.payment?.status == PaymentStatus.SUCCESS) {
+            order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DELIVERED)
+                    ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+        }else {
+            order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.PAYMENT_PENDING)
+                    ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+        }
 
         orderRepo.save(order)
         setFsPendingOrderUpdateStatus(order.id, OrderStatusCode.DELIVERED)
@@ -326,6 +337,22 @@ class OrderService(
             val values: MutableMap<String, Any> = mutableMapOf("status" to statusId)
             pendingOrdersRef.update(values)
         }
+    }
+
+    fun confirmPayment(orderId: Long): Response {
+        val driver = driverService.getLoggedInDriver()
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        val order = orderRepo.findByIdOrNull(orderId)
+                ?:return serviceResponse(400, NO_PENDING_ORDER)
+
+        if (order.driver != driver) return serviceResponse(400, NO_PENDING_ORDER)
+
+        order.status = orderStatusRepo.findByIdOrNull(OrderStatusCode.DELIVERED)
+                ?:return serviceResponse(400, ERROR_OCCURRED_MSG)
+
+        orderRepo.save(order)
+        return serviceResponse(message = ORDER_COMPLETED)
     }
 
     fun rateCustomer(ratingRequest: RatingRequest): Response {
