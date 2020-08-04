@@ -40,8 +40,34 @@ class AddressService(
         var address = if (addressRequest.id != null) {
             customer.address.find { address -> address.id == addressRequest.id } ?: return null
         }else {
-            customer.address.find { address -> address.type == addressType } ?: Address()
+            customer.address.find { address -> address.type == addressType }
         }
+
+        if (address != null) {
+            customer.address.remove(address)
+            customerRepo.save(customer)
+        }else address = Address()
+        address = saveAddressDetails(address, addressRequest)
+
+        if (address.id == null) {
+            address = addressRepo.save(address)
+            customer.address.add(address)
+        }else {
+            address = addressRepo.save(address)
+        }
+
+        return address
+    }
+
+    fun saveAddressAnonymous(addressRequest: AddressRequest): Address {
+        val address = saveAddressDetails(Address(), addressRequest)
+        return addressRepo.save(address)
+    }
+
+    fun saveAddressDetails(address: Address, addressRequest: AddressRequest): Address {
+        val addressType = if (addressRequest.type in addressTypes) {
+            addressRequest.type
+        }else addressTypes[0]
 
         address.address = addressRequest.address
         address.type = addressType
@@ -51,13 +77,6 @@ class AddressService(
         location.lat = addressRequest.lat
         locationRepo.save(location)
         address.location = location
-
-        if (address.id == null) {
-            address = addressRepo.save(address)
-            customer.address.add(address)
-        }else {
-            address = addressRepo.save(address)
-        }
 
         return address
     }
