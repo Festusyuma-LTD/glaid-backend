@@ -11,6 +11,8 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @EnableWebSecurity
 class SecurityConfiguration (
@@ -24,7 +26,9 @@ class SecurityConfiguration (
 
     override fun configure(http: HttpSecurity?) {
 
-        http?.csrf()?.disable()?.authorizeRequests()
+        http?.cors()?.and()
+                ?.csrf()?.disable()
+                ?.authorizeRequests()
                 ?.antMatchers(
                         "/",
                         "/login",
@@ -50,5 +54,14 @@ class SecurityConfiguration (
     @Bean
     override fun authenticationManager(): AuthenticationManager {
         return super.authenticationManager()
+    }
+
+    @Bean
+    fun corsConfigurer(): WebMvcConfigurer {
+        return object : WebMvcConfigurer {
+            override fun addCorsMappings(registry: CorsRegistry) {
+                registry.addMapping("/**")
+            }
+        }
     }
 }
