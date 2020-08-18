@@ -4,5 +4,6 @@ data class GasTypeRequest (
         val id: Long? = null,
         val type: String,
         val price: Double,
-        val unit: String
+        val unit: String,
+        val hasFixedQuantities: Boolean = false
 )
