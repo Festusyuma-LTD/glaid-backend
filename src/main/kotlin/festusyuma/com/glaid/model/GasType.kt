@@ -2,6 +2,7 @@ package festusyuma.com.glaid.model
 
 import javax.persistence.Entity
 import javax.persistence.OneToMany
+import javax.persistence.OrderBy
 
 @Entity
 data class GasType (
@@ -12,5 +13,6 @@ data class GasType (
         var hasFixedQuantity: Boolean = false,
 
         @OneToMany
+        @OrderBy("quantity ASC")
         var fixedQuantities: MutableList<GasTypeQuantities> = mutableListOf()
 ): Common()
