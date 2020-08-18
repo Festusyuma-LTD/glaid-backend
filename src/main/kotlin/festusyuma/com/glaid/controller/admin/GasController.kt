@@ -15,6 +15,11 @@ class GasController(
         private val gasService: GasService
 ) {
 
+    @GetMapping("list")
+    fun getGsTypes(): ResponseEntity<Response> {
+        return response(data = gasService.list())
+    }
+
     @PostMapping("save")
     fun saveGas(@RequestBody gasTypeRequest: GasTypeRequest): ResponseEntity<Response> {
         val req = gasService.save(gasTypeRequest)

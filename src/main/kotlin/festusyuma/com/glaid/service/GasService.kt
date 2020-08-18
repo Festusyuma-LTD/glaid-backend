@@ -17,6 +17,10 @@ class GasService(
         private val fixedQuantityRepo: FixedQuantityRepo
 ) {
 
+    fun list(): MutableList<GasTypeQuantities> {
+        return fixedQuantityRepo.findAll().toMutableList()
+    }
+
     fun save(gasTypeRequest: GasTypeRequest): Response {
         val gasType = if (gasTypeRequest.id != null) {
             gasRepo.findByIdOrNull(gasTypeRequest.id)?: return serviceResponse(400, "Invalid gas id")
