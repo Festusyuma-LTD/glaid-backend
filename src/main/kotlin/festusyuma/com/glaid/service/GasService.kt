@@ -17,8 +17,8 @@ class GasService(
         private val fixedQuantityRepo: FixedQuantityRepo
 ) {
 
-    fun list(): MutableList<GasTypeQuantities> {
-        return fixedQuantityRepo.findAll().toMutableList()
+    fun list(): MutableList<GasType> {
+        return gasRepo.findAll().toMutableList()
     }
 
     fun save(gasTypeRequest: GasTypeRequest): Response {
