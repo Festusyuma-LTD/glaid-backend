@@ -42,7 +42,9 @@ class OrderService(
             val gasType = gasRepo.findByIdOrNull(orderRequest.gasTypeId)?:
                     return serviceResponse(400, "invalid gas id")
 
-            val total = gasType.price * orderRequest.quantity
+            val total = getOrderQuantityPrice(gasType, orderRequest.quantity)
+                    ?: return serviceResponse(400, "Invalid quantity")
+
             val delivery = getDeliveryPrice()
             val tax = getTaxPrice(total)
             val deliveryAddress = getDeliveryAddress(orderRequest.deliveryAddress)
@@ -84,6 +86,17 @@ class OrderService(
         return serviceResponse(400, "an unknown error occurred")
     }
 
+    private fun getOrderQuantityPrice(gasType: GasType, quantity: Double): Double? {
+
+        if (gasType.hasFixedQuantity) {
+            val fixedQuantity = gasType.fixedQuantities.find {
+                it.quantity == quantity
+            }?: return null
+
+            return fixedQuantity.price
+        }else return gasType.price * quantity
+    }
+
     private fun saveFSPendingOrder(order: Orders, user: User) {
         val userRef = db.collection(USERS).document(user.id.toString()).get().get()
         val fsUser = userRef.toObject(FSUser::class.java)
@@ -113,7 +126,7 @@ class OrderService(
     }
 
     fun getMinimumBusinessDelivery():Double {
-        return 5000.0
+        return 1.0
     }
 
     fun getDeliveryAddress(addressRequest: AddressRequest): Address? {
