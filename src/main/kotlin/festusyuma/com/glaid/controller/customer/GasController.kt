@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.controller.customer
 
+import festusyuma.com.glaid.model.GasType
 import festusyuma.com.glaid.service.GasService
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
@@ -21,9 +22,14 @@ class GasController(
         val req = service.listGasByType(type)
 
         return if (req.status == 200) {
+            val gasType = req.data as GasType
+            val predefinedQuantities: List<Double> = if (gasType.hasFixedQuantity) {
+                gasType.fixedQuantities.take(2).map { it.quantity }
+            }else listOf(50.0, 100.0)
+
             val data = mutableMapOf(
-                    "gasType" to req.data,
-                    "predefinedQuantities" to listOf(50.0, 100.0)
+                    "gasType" to gasType,
+                    "predefinedQuantities" to predefinedQuantities
             )
 
             response(data = data)
