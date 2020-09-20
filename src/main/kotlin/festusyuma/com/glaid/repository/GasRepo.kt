@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface GasRepo: CrudRepository<GasType, Long> {
     fun findByType(type: String): GasType?
+    fun findByTypeIn(types: List<String>): List<GasType>
 }
