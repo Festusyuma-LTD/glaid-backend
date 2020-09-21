@@ -1,5 +1,6 @@
 package festusyuma.com.glaid.controller.customer
 
+import festusyuma.com.glaid.model.GasTypeQuantities
 import festusyuma.com.glaid.repository.GasRepo
 import festusyuma.com.glaid.service.CustomerService
 import festusyuma.com.glaid.util.Response
@@ -21,10 +22,18 @@ class DashboardController(
     fun home(): ResponseEntity<Response> {
         val customer = customerService.getLoggedInCustomer()?:
                 return response(HttpStatus.BAD_REQUEST, "an error occurred")
-        val gasType = gasRepo.findByTypeIn(listOf("diesel", "gas"));
-        val data = mapOf<String, Any>(
+        val gasTypes = gasRepo.findByTypeIn(listOf("diesel", "gas"));
+
+        for (gasType in gasTypes) {
+            if (!gasType.hasFixedQuantity) gasType.fixedQuantities = mutableListOf(
+                    GasTypeQuantities(50.0, 0.0),
+                    GasTypeQuantities(100.0, 0.0)
+            )
+        }
+
+        val data = mapOf(
                 "customer" to customer,
-                "gasType" to gasType
+                "gasType" to gasTypes
         )
 
         return response(message = "Customer Welcome", data = data)
