@@ -60,4 +60,12 @@ class UserService(
         val email = SecurityContextHolder.getContext().authentication.name
         return userRepo.findByEmail(email)
     }
+
+    fun uploadImage(imageUrl: String): Response {
+        val user = getLoggedInUser()?: return serviceResponse(400, "Invalid user")
+        user.profileImage = imageUrl
+        userRepo.save(user)
+
+        return serviceResponse()
+    }
 }

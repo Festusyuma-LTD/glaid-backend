@@ -25,5 +25,6 @@ data class User (
         var credentialsExpired: Boolean = false,
         var enabled: Boolean = true,
 
-        var rating: Double = 0.0
+        var rating: Double = 0.0,
+        var profileImage: String? = null
 ): Common()
