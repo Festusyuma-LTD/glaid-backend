@@ -356,7 +356,7 @@ class OrderService(
             refundOrderPayment(order)
             setFsPendingOrderUpdateStatus(order.id, status.id)
 
-            return serviceResponse(message = "Order cancelled")
+            return serviceResponse(message = "Order cancelled", data = mapOf("wallet" to order.customer.wallet.wallet))
         }
 
         return serviceResponse(400, "Order cannot be cancelled")
