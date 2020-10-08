@@ -347,7 +347,7 @@ class OrderService(
         val order = orderRepo.findByIdOrNull(orderId)
                 ?: return serviceResponse(400, "Invalid order id")
 
-        if (order.status.id == OrderStatusCode.PAYMENT_PENDING) {
+        if (order.status.id != OrderStatusCode.PENDING) {
             val status = orderStatusRepo.findByIdOrNull(OrderStatusCode.FAILED)
                     ?: return serviceResponse(400, "An error occurred")
 
