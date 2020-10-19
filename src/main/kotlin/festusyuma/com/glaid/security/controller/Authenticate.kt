@@ -119,6 +119,9 @@ class Authenticate(
                 .build()
 
         val idToken = verifier.verify(token)
+        println("idToken ID: $idToken")
+        println("verifier: $verifier")
+
         if (idToken != null) {
             val payload: GoogleIdToken.Payload = idToken.payload
 
