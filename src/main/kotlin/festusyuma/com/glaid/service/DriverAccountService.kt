@@ -23,7 +23,7 @@ class DriverAccountService(
 
     val errorMessage = "An unknown error occurred"
 
-    fun register(driverRequest: UserRequest): Response {
+    fun register(driverRequest: UserRequest, verified: Boolean = false): Response {
         val role = roleRepo.findByIdOrNull(2)
                 ?: return serviceResponse(400, message = errorMessage)
 
@@ -35,7 +35,7 @@ class DriverAccountService(
                 role
         )
 
-        val req = userService.createUser(user, driverRequest.otp)
+        val req = userService.createUser(user, driverRequest.otp, verified)
         return if (req.status == 200) {
             if (req.message != "verification") {
                 user = req.data as User

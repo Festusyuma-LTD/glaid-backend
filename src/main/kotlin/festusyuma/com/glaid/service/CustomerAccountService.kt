@@ -24,7 +24,7 @@ class CustomerAccountService(
 ) {
     private val errorMessage: String = "An unknown error occurred"
 
-    fun register(customerRequest: UserRequest): Response {
+    fun register(customerRequest: UserRequest, verified: Boolean = false): Response {
         val role = roleRepo.findByIdOrNull(3)
                 ?: return serviceResponse(400, message = errorMessage)
 
@@ -36,7 +36,7 @@ class CustomerAccountService(
                 role
         )
 
-        val req = userService.createUser(user, customerRequest.otp)
+        val req = userService.createUser(user, customerRequest.otp, verified)
         return if (req.status == 200) {
             if (req.message != "verification") {
                 user = req.data as User

@@ -18,19 +18,21 @@ class UserService(
 ) {
     private val errorMessage: String = "An unknown error occurred"
 
-    fun createUser(user: User, otp: String? = null): Response {
+    fun createUser(user: User, otp: String? = null, verified: Boolean = false): Response {
         val existingUserEmail = userRepo.findByEmail(user.email)
         val existingUserPhone = userRepo.findByTel(user.tel)
 
         if (existingUserEmail != null) return serviceResponse(400, message = "Email already registered")
         if (existingUserPhone != null) return serviceResponse(400, message = "Phone number already registered")
 
-        if (otp == null) {
+        if (otp == null && !verified) {
             otpService.sendOtpToNumber(user)
             return serviceResponse(message = "verification")
         }else {
-            otpRepo.findByOtpAndEmailAndExpired(otp, user.email)
-                    ?: return serviceResponse(401, message = "Invalid OTP")
+            if (otp != null) {
+                otpRepo.findByOtpAndEmailAndExpired(otp, user.email)
+                        ?: return serviceResponse(401, message = "Invalid OTP")
+            }
         }
 
         user.password = passwordEncoder.encode(user.password)
