@@ -50,4 +50,13 @@ class BookingController(
             response(data = req.data)
         }else response(HttpStatus.BAD_REQUEST, req.message)
     }
+
+    @GetMapping("order/{orderId}/cancel")
+    fun cancelOrder(@PathVariable orderId: Long): ResponseEntity<Response> {
+        val req = service.cancelOrder(orderId)
+
+        return if (req.status == 200) {
+            response(message = req.message, data = req.data)
+        }else response(HttpStatus.BAD_REQUEST, req.message)
+    }
 }

@@ -343,6 +343,35 @@ class OrderService(
         return serviceResponse(message = ORDER_COMPLETED)
     }
 
+    fun cancelOrder(orderId: Long): Response {
+        val order = orderRepo.findByIdOrNull(orderId)
+                ?: return serviceResponse(400, "Invalid order id")
+
+        if (order.status.id == OrderStatusCode.PENDING) {
+            val status = orderStatusRepo.findByIdOrNull(OrderStatusCode.FAILED)
+                    ?: return serviceResponse(400, "An error occurred")
+
+            order.status = status;
+            orderRepo.save(order)
+            refundOrderPayment(order)
+            setFsPendingOrderUpdateStatus(order.id, status.id)
+
+            return serviceResponse(message = "Order cancelled", data = mapOf("wallet" to order.customer.wallet.wallet))
+        }
+
+        return serviceResponse(400, "Order cannot be cancelled")
+    }
+
+    private fun refundOrderPayment(order: Orders) {
+        val payment = order.payment?: return
+
+        if (payment.status == PaymentStatus.SUCCESS) {
+            val wallet = order.customer.wallet
+            wallet.wallet += payment.amount
+            walletRepo.save(wallet)
+        }
+    }
+
     private fun setFsPendingOrderUpdateStatus(orderId: Long?, statusId: Long?) {
         if (orderId != null && statusId != null) {
             val pendingOrdersRef = db.collection(PENDING_ORDERS).document(orderId.toString())
