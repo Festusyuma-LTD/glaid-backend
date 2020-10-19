@@ -20,10 +20,11 @@ import festusyuma.com.glaid.security.model.AuthenticateRequest
 import festusyuma.com.glaid.security.model.PasswordUpdateRequest
 import festusyuma.com.glaid.security.utl.JWTUtil
 import festusyuma.com.glaid.security.utl.PasswordResetRequest
-import festusyuma.com.glaid.service.UserOTPService
+import festusyuma.com.glaid.service.*
 import festusyuma.com.glaid.util.ERROR_OCCURRED_MSG
 import festusyuma.com.glaid.util.Response
 import festusyuma.com.glaid.util.response
+import festusyuma.com.glaid.util.serviceResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
@@ -45,6 +46,7 @@ class Authenticate(
         private val userPasswordService: UserPasswordService,
         private val otpService: UserOTPService,
         private val jwtUtil: JWTUtil,
+        private val googleAccountService: GoogleAccountService,
         private val userRepo: UserRepo,
         private val passwordEncoder: PasswordEncoder,
         private val driverRepo: DriverRepo,
@@ -52,19 +54,9 @@ class Authenticate(
         private val roleRepo: RoleRepo
 ) {
 
-    @Value("\${CLIENT_ID}")
-    lateinit var clientId: String
-
-    @Value("\${CLIENT_SECRET}")
-    lateinit var clientSecret: String
-
     @PostMapping("/login")
     fun login(@RequestBody req: AuthenticateRequest): ResponseEntity<Response> {
-
         var userDetails: UserDetails? = null
-
-        //todo handle google and facebook login
-        println("login type: ${req.loginType}")
 
         when(req.loginType) {
             "email" -> {
@@ -77,15 +69,16 @@ class Authenticate(
             }
             "google" -> {
                 val token = req.token
-                println("token: $token")
                 if (token != null) {
-                    val payload = googleSignIn(token)
+                    val payload = googleAccountService.googleSignIn(token)
                             ?: return response(HttpStatus.UNAUTHORIZED, "Incorrect email or password")
 
-                    println("payload: $payload")
                     userDetails = userDetailsService.loadUserByUsername(payload.email)
                     if (userDetails == null) {
-                        createAccountFromGooglePayload(payload, req.role)
+                        val res = googleAccountService.createAccountFromGooglePayload(payload, req.role)
+                        if(res.status == 200) {
+                            userDetails = userDetailsService.loadUserByUsername(payload.email)
+                        }else return response(HttpStatus.valueOf(res.status), res.message, res.data)
                     }
                 } else return response(HttpStatus.UNAUTHORIZED, "Incorrect email or password")
             }
@@ -112,47 +105,6 @@ class Authenticate(
                     )
             )
         }else response(HttpStatus.UNAUTHORIZED, "Incorrect email or password")
-    }
-
-    private fun googleSignIn(token: String): GoogleIdToken.Payload? {
-        val jsonFactory = GsonFactory()
-        val transport = NetHttpTransport()
-
-        val verifier = GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                .setAudience(Collections.singletonList(clientId))
-                .build()
-
-        val idToken = verifier.verify(token)
-        println("idToken ID: $idToken")
-        println("verifier: $verifier")
-
-        if (idToken != null) {
-            val payload: GoogleIdToken.Payload = idToken.payload
-
-            // Print user identifier
-            val userId: String = payload.subject
-            println("User ID: $userId")
-
-            // Get profile information from payload
-            val email: String = payload.email
-            val emailVerified: Boolean = java.lang.Boolean.valueOf(payload.emailVerified)
-            val name = payload["name"] as String
-            val locale = payload["locale"] as String
-            val familyName = payload["family_name"] as String
-            val givenName = payload["given_name"] as String
-
-            println("Name: $name, Family name: $familyName")
-
-            return payload
-        } else {
-            return null;
-        }
-    }
-
-    private fun createAccountFromGooglePayload(payload: GoogleIdToken.Payload, role: Long) {
-        when(role) {
-
-        }
     }
 
     @PostMapping("/change_password")
