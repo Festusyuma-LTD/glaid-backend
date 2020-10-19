@@ -4,6 +4,8 @@ import com.google.api.client.extensions.appengine.http.UrlFetchTransport
 import com.google.api.client.googleapis.apache.GoogleApacheHttpTransport
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import festusyuma.com.glaid.dto.UserOTPRequest
 import festusyuma.com.glaid.dto.UserRequest
@@ -113,8 +115,10 @@ class Authenticate(
     }
 
     private fun googleSignIn(token: String): GoogleIdToken.Payload? {
-        val jsonFactory = JacksonFactory()
-        val verifier = GoogleIdTokenVerifier.Builder(UrlFetchTransport.getDefaultInstance(), jsonFactory)
+        val jsonFactory = GsonFactory()
+        val transport = NetHttpTransport()
+
+        val verifier = GoogleIdTokenVerifier.Builder(transport, jsonFactory)
                 .setAudience(Collections.singletonList(clientId))
                 .build()
 
