@@ -108,6 +108,7 @@ class Authenticate(
 
     private fun googleSignIn(token: String): GoogleIdToken.Payload? {
         val jsonFactory = JacksonFactory()
+        println(clientId)
         val verifier = GoogleIdTokenVerifier.Builder(UrlFetchTransport.getDefaultInstance(), jsonFactory)
                 .setAudience(Collections.singletonList(clientId))
                 .build()
