@@ -1,6 +1,7 @@
 package festusyuma.com.glaid.security.controller
 
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport
+import com.google.api.client.googleapis.apache.GoogleApacheHttpTransport
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -109,7 +110,7 @@ class Authenticate(
 
     private fun googleSignIn(token: String): GoogleIdToken.Payload? {
         val jsonFactory = JacksonFactory()
-        val verifier = GoogleIdTokenVerifier.Builder(UrlFetchTransport.getDefaultInstance(), jsonFactory)
+        val verifier = GoogleIdTokenVerifier.Builder(GoogleApacheHttpTransport.newTrustedTransport(), jsonFactory)
                 .setAudience(Collections.singletonList(clientId))
                 .build()
 
