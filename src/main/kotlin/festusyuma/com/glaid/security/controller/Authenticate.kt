@@ -62,6 +62,8 @@ class Authenticate(
         var userDetails: UserDetails? = null
 
         //todo handle google and facebook login
+        println("login type: ${req.loginType}")
+
         when(req.loginType) {
             "email" -> {
                 try {
@@ -73,10 +75,12 @@ class Authenticate(
             }
             "google" -> {
                 val token = req.token
+                println("token: $token")
                 if (token != null) {
                     val payload = googleSignIn(token)
                             ?: return response(HttpStatus.UNAUTHORIZED, "Incorrect email or password")
 
+                    println("payload: $payload")
                     userDetails = userDetailsService.loadUserByUsername(payload.email)
                     if (userDetails == null) {
                         createAccountFromGooglePayload(payload, req.role)
@@ -110,7 +114,6 @@ class Authenticate(
 
     private fun googleSignIn(token: String): GoogleIdToken.Payload? {
         val jsonFactory = JacksonFactory()
-        println(clientId)
         val verifier = GoogleIdTokenVerifier.Builder(UrlFetchTransport.getDefaultInstance(), jsonFactory)
                 .setAudience(Collections.singletonList(clientId))
                 .build()
